@@ -1,13 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from database import get_db
 import models
 import schemas
 from services.transaction_monitor import TransactionMonitor
+from pydantic import BaseModel, constr
+from supabase_client import get_reviews, create_review
 
 router = APIRouter()
 transaction_monitor = TransactionMonitor()
+
+class ReviewBase(BaseModel):
+    store_id: str
+    rating: int
+    comment: Optional[str] = None
+    txid: constr(min_length=64, max_length=64)  # Bitcoin transaction ID validation
+
+class ReviewCreate(ReviewBase):
+    pass
+
+class Review(ReviewBase):
+    id: str
+    created_at: str
+    updated_at: str
 
 @router.post("/", response_model=schemas.ReviewResponse)
 async def create_review(review: schemas.ReviewCreate, db: Session = Depends(get_db)):
@@ -27,20 +43,13 @@ async def create_review(review: schemas.ReviewCreate, db: Session = Depends(get_
     db.refresh(db_review)
     return db_review
 
-@router.get("/store/{store_id}", response_model=List[schemas.ReviewResponse])
-async def list_store_reviews(
-    store_id: str,
-    skip: int = 0,
-    limit: int = 100,
-    verified_only: bool = False,
-    db: Session = Depends(get_db)
-):
-    """List all reviews for a specific store."""
-    query = db.query(models.Review).filter(models.Review.store_id == store_id)
-    if verified_only:
-        query = query.filter(models.Review.verified == True)
-    reviews = query.offset(skip).limit(limit).all()
-    return reviews
+@router.get("/store/{store_id}", response_model=List[Review])
+async def list_store_reviews(store_id: str):
+    try:
+        response = get_reviews(store_id)
+        return response.data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{review_id}", response_model=schemas.ReviewResponse)
 async def get_review(review_id: str, db: Session = Depends(get_db)):
@@ -129,4 +138,13 @@ async def delete_review(review_id: str, db: Session = Depends(get_db)):
 
     db.delete(review)
     db.commit()
-    return {"status": "success", "message": "Review deleted successfully"} 
+    return {"status": "success", "message": "Review deleted successfully"}
+
+@router.post("", response_model=Review)
+async def create_new_review(review: ReviewCreate):
+    try:
+        # TODO: Add transaction verification logic here
+        response = create_review(review.dict())
+        return response.data[0]
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 

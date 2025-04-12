@@ -3,13 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
 from routers import stores, reviews
-from database import engine, Base
 
 # Load environment variables
 load_dotenv()
-
-# Create database tables
-Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="We Accept Bitcoin API",

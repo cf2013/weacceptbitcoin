@@ -2,6 +2,7 @@ import os
 import requests
 from typing import Dict, List, Optional, Any, Union
 from dotenv import load_dotenv
+from dataclasses import dataclass
 
 # Load environment variables
 load_dotenv()
@@ -13,6 +14,11 @@ SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_KEY
 if not SUPABASE_URL or not SUPABASE_KEY:
     raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in .env file")
 
+@dataclass
+class SupabaseResponse:
+    data: Optional[Union[List[Dict], Dict]] = None
+    error: Optional[str] = None
+
 # Headers for Supabase REST API
 headers = {
     'apikey': SUPABASE_KEY,
@@ -21,29 +27,25 @@ headers = {
     'Prefer': 'return=representation'
 }
 
-def handle_response(response: requests.Response) -> Union[List[Dict], Dict, None]:
-    """Handle the API response and raise exceptions for errors."""
+def handle_response(response: requests.Response) -> SupabaseResponse:
+    """Handle the API response and return a consistent response object."""
     try:
         response.raise_for_status()
         data = response.json()
         
-        # If the response is a list, return it directly
-        if isinstance(data, list):
-            return data
+        # If the response is a list or dict, wrap it in SupabaseResponse
+        if isinstance(data, (list, dict)):
+            return SupabaseResponse(data=data)
             
-        # If it's a single object, return it
-        if isinstance(data, dict):
-            return data
-            
-        # If it's something else, return None
-        return None
+        # If it's something else, return None data
+        return SupabaseResponse(data=None)
     except requests.exceptions.HTTPError as e:
         print(f"HTTP Error: {e}")
         print(f"Response content: {response.text}")
-        return None
+        return SupabaseResponse(error=str(e))
     except Exception as e:
         print(f"Error: {e}")
-        return None
+        return SupabaseResponse(error=str(e))
 
 def get_stores() -> List[Dict]:
     """Get all stores from the database."""
@@ -52,7 +54,7 @@ def get_stores() -> List[Dict]:
         headers=headers
     )
     result = handle_response(response)
-    return result if isinstance(result, list) else []
+    return result.data if isinstance(result.data, list) else []
 
 def get_store(store_id: str) -> Optional[Dict]:
     """Get a specific store by ID."""
@@ -61,8 +63,8 @@ def get_store(store_id: str) -> Optional[Dict]:
         headers=headers
     )
     result = handle_response(response)
-    if isinstance(result, list) and len(result) > 0:
-        return result[0]
+    if isinstance(result.data, list) and len(result.data) > 0:
+        return result.data[0]
     return None
 
 def create_store(store_data: Dict) -> Optional[Dict]:
@@ -73,9 +75,9 @@ def create_store(store_data: Dict) -> Optional[Dict]:
         json=store_data
     )
     result = handle_response(response)
-    if isinstance(result, list) and len(result) > 0:
-        return result[0]
-    return result if isinstance(result, dict) else None
+    if isinstance(result.data, list) and len(result.data) > 0:
+        return result.data[0]
+    return result.data if isinstance(result.data, dict) else None
 
 def update_store(store_id: str, update_data: Dict) -> Optional[Dict]:
     """Update a store by ID."""
@@ -85,9 +87,9 @@ def update_store(store_id: str, update_data: Dict) -> Optional[Dict]:
         json=update_data
     )
     result = handle_response(response)
-    if isinstance(result, list) and len(result) > 0:
-        return result[0]
-    return result if isinstance(result, dict) else None
+    if isinstance(result.data, list) and len(result.data) > 0:
+        return result.data[0]
+    return result.data if isinstance(result.data, dict) else None
 
 def get_reviews(store_id: str) -> List[Dict]:
     """Get all reviews for a specific store."""
@@ -96,7 +98,7 @@ def get_reviews(store_id: str) -> List[Dict]:
         headers=headers
     )
     result = handle_response(response)
-    return result if isinstance(result, list) else []
+    return result.data if isinstance(result.data, list) else []
 
 def create_review(review_data: Dict) -> Optional[Dict]:
     """Create a new review."""
@@ -106,6 +108,6 @@ def create_review(review_data: Dict) -> Optional[Dict]:
         json=review_data
     )
     result = handle_response(response)
-    if isinstance(result, list) and len(result) > 0:
-        return result[0]
-    return result if isinstance(result, dict) else None 
+    if isinstance(result.data, list) and len(result.data) > 0:
+        return result.data[0]
+    return result.data if isinstance(result.data, dict) else None 

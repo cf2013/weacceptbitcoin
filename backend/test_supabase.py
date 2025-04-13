@@ -16,8 +16,7 @@ def main():
     new_store = {
         "name": "Test Store",
         "description": "A test store created via REST API",
-        "website": "https://teststore.com",
-        "bitcoin_address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+        "btc_address": "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
     }
     created_store = create_store(new_store)
     print(f"Created store: {created_store}")
@@ -44,7 +43,7 @@ def main():
             "store_id": store_id,
             "rating": 5,
             "comment": "Great test store!",
-            "bitcoin_txid": "a1b2c3d4e5f6g7h8i9j0"
+            "txid": "a1b2c3d4e5f6g7h8i9j0"
         }
         created_review = create_review(review_data)
         print(f"Created review: {created_review}")

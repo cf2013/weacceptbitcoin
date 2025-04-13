@@ -30,15 +30,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
         body: JSON.stringify(data),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error('Failed to create store');
+        throw new Error(responseData.error || responseData.detail || 'Failed to create store');
       }
 
-      const store = await response.json();
-      setStoreData(store);
+      setStoreData(responseData);
       setStep('verify');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Store creation error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred while creating the store');
     } finally {
       setIsLoading(false);
     }
@@ -59,12 +61,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
         body: JSON.stringify(data),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.detail || 'Verification failed');
+        throw new Error(responseData.error || responseData.detail || 'Verification failed');
       }
 
-      const verifiedStore = await response.json();
       setVerificationStatus('verified');
       
       // Close modal after 3 seconds on success
@@ -77,8 +79,9 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
         setError('');
       }, 3000);
     } catch (err) {
+      console.error('Verification error:', err);
       setVerificationStatus('failed');
-      setError(err instanceof Error ? err.message : 'Verification failed');
+      setError(err instanceof Error ? err.message : 'An error occurred during verification');
     } finally {
       setIsLoading(false);
     }

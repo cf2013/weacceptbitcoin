@@ -1,9 +1,15 @@
+'use client';
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { FaBitcoin } from 'react-icons/fa';
 import StoreCard from '@/components/StoreCard';
+import RegisterModal from '@/components/RegisterModal';
 import { mockStores } from '@/data/mockData';
 
 export default function Home() {
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
   return (
     <div className="container mx-auto px-4 py-8">
       {/* Hero Section */}
@@ -22,9 +28,12 @@ export default function Home() {
           <Link href="/stores" className="btn btn-primary">
             Browse Stores
           </Link>
-          <Link href="/stores/add" className="btn btn-outline">
+          <button 
+            onClick={() => setIsRegisterModalOpen(true)}
+            className="btn btn-outline"
+          >
             Add Your Store
-          </Link>
+          </button>
         </div>
       </section>
 
@@ -74,6 +83,12 @@ export default function Home() {
           </Link>
         </div>
       </section>
+
+      {/* Register Modal */}
+      <RegisterModal
+        isOpen={isRegisterModalOpen}
+        onClose={() => setIsRegisterModalOpen(false)}
+      />
     </div>
   );
 } 

@@ -27,17 +27,23 @@ export interface ApiResponse<T> {
 }
 
 export interface StoreFormData {
+  id?: string;
   name: string;
   description?: string;
   category?: string;
   website?: string;
   btc_address: string;
+  verified?: boolean;
+  verification_txid?: string;
+  verification_amount?: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface ReviewFormData {
   store_id: string;
   rating: number;
-  text?: string;
+  comment: string;
   txid: string;
 }
 

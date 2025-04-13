@@ -9,6 +9,8 @@ create table if not exists stores (
     category text,
     btc_address text not null,
     verified boolean default false,
+    verification_txid text,
+    verification_amount bigint,
     created_at timestamp with time zone default timezone('utc'::text, now()),
     updated_at timestamp with time zone default timezone('utc'::text, now())
 );

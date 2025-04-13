@@ -2,6 +2,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, constr, UUID4
 from typing import Optional, List
 from supabase_client import get_store, get_stores, create_store, update_store, get_reviews
+from services.bitcoin import verify_transaction
 
 router = APIRouter()
 
@@ -20,8 +21,13 @@ class StoreCreate(BaseModel):
 class Store(StoreCreate):
     id: str
     verified: bool
+    verification_txid: Optional[str] = None
+    verification_amount: Optional[int] = None
     created_at: str
     updated_at: str
+
+class VerificationRequest(BaseModel):
+    txid: str
 
 @router.get("", response_model=List[Store])
 async def list_stores():
@@ -116,20 +122,41 @@ async def update_store_by_id(store_id: str, store: StoreBase):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{store_id}/verify", response_model=Store)
-async def verify_store(store_id: str):
+async def verify_store(store_id: str, verification: VerificationRequest):
     """Verify a store using Bitcoin transaction"""
     try:
         store = get_store(store_id)
         if not store:
             raise HTTPException(status_code=404, detail="Store not found")
             
-        # TODO: Add transaction verification logic here
-        # For MVP, we can just mark it as verified
-        update_data = {"verified": True}
+        if not store.get('btc_address'):
+            raise HTTPException(status_code=400, detail="Store has no Bitcoin address")
+            
+        # Verify the transaction
+        verification_result = verify_transaction(
+            txid=verification.txid,
+            expected_address=store['btc_address']
+        )
+        
+        if not verification_result['verified']:
+            raise HTTPException(
+                status_code=400,
+                detail=verification_result.get('error', 'Transaction verification failed')
+            )
+            
+        # Update store verification status
+        update_data = {
+            "verified": True,
+            "verification_txid": verification.txid,
+            "verification_amount": verification_result.get('amount'),
+        }
+        
         response = update_store(store_id, update_data)
         if not response:
             raise HTTPException(status_code=500, detail="Failed to verify store")
         return response
+    except HTTPException as e:
+        raise e
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

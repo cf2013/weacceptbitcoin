@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaTimes } from 'react-icons/fa';
 import StoreForm from './StoreForm';
 import VerificationForm from './VerificationForm';
@@ -16,6 +16,17 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
   const [verificationStatus, setVerificationStatus] = React.useState<'pending' | 'verified' | 'failed'>('pending');
   const [error, setError] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState(false);
+
+  // Reset state when modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      setStep('register');
+      setStoreData(null);
+      setVerificationStatus('pending');
+      setError('');
+      setIsLoading(false);
+    }
+  }, [isOpen]);
 
   const handleStoreSubmit = async (data: StoreFormData) => {
     setIsLoading(true);
@@ -78,6 +89,12 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
     }
   };
 
+  const handleManualVerify = () => {
+    // This function will be passed to VerificationStatus to allow manual verification
+    setVerificationStatus('pending');
+    setError('');
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -121,12 +138,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
                     onDismiss={() => {
                       console.log('OK button clicked, dismissing verification status');
                       onClose();
-                      // Reset state for next time
-                      setStep('register');
-                      setStoreData(null);
-                      setVerificationStatus('pending');
-                      setError('');
                     }}
+                    onManualVerify={handleManualVerify}
                   />
 
                   {verificationStatus === 'pending' && (
@@ -140,7 +153,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
                 </div>
               )}
 
-              {error && (
+              {/* Only show error in the register step or if there's no VerificationStatus component */}
+              {error && (step === 'register' || !storeData) && (
                 <div className="mt-4 p-4 bg-red-50 text-red-500 rounded-md">
                   {error}
                 </div>

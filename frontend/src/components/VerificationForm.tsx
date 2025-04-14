@@ -1,6 +1,6 @@
 import React from 'react';
 import { useForm } from 'react-hook-form';
-import { FaBitcoin } from 'react-icons/fa';
+import { FaBitcoin, FaArrowRight } from 'react-icons/fa';
 import { VerificationFormData } from '@/types';
 
 interface VerificationFormProps {
@@ -20,30 +20,16 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
     register,
     handleSubmit,
     formState: { errors },
+    reset,
   } = useForm<VerificationFormData>();
+
+  // Reset form when component mounts to ensure clean state
+  React.useEffect(() => {
+    reset();
+  }, [reset]);
 
   return (
     <div className="card bg-gray-50">
-      <div className="flex items-center mb-4">
-        <FaBitcoin className="text-bitcoin-orange text-2xl mr-2" />
-        <h3 className="text-xl font-bold">
-          {type === 'store' ? 'Verify Your Store' : 'Verify Your Review'}
-        </h3>
-      </div>
-
-      <p className="mb-4 text-gray-700">
-        {type === 'store'
-          ? 'To verify your store, send a small Bitcoin transaction (5,000+ sats) from the address you provided.'
-          : 'To verify your review, provide the transaction ID of your payment to this store.'}
-      </p>
-
-      {type === 'store' && address && (
-        <div className="mb-4 p-3 bg-gray-100 rounded-md">
-          <p className="text-sm text-gray-600 mb-1">Send payment to:</p>
-          <p className="font-mono text-sm break-all">{address}</p>
-        </div>
-      )}
-
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="txid" className="label">
@@ -53,6 +39,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
             id="txid"
             type="text"
             className={`input ${errors.txid ? 'border-red-500' : ''}`}
+            placeholder="Enter the transaction ID from your Bitcoin wallet"
             {...register('txid', { required: 'Transaction ID is required' })}
           />
           {errors.txid && (
@@ -63,10 +50,11 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
         <div className="pt-2">
           <button
             type="submit"
-            className="btn btn-primary w-full"
+            className="btn btn-primary w-full flex items-center justify-center"
             disabled={isLoading}
           >
-            {isLoading ? 'Verifying...' : 'Verify'}
+            {isLoading ? 'Verifying...' : 'Verify Store'}
+            {!isLoading && <FaArrowRight className="ml-2" />}
           </button>
         </div>
       </form>
@@ -74,7 +62,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
       <div className="mt-4 text-sm text-gray-500">
         <p>
           {type === 'store'
-            ? 'Verification helps build trust with customers and ensures you control the Bitcoin address.'
+            ? 'Verification helps build trust with customers and ensures you control the Bitcoin address. Your store will be listed in our directory once verified.'
             : 'Verified reviews help other customers make informed decisions.'}
         </p>
       </div>

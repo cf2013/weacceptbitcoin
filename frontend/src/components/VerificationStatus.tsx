@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { FaBitcoin, FaCheckCircle, FaClock, FaExclamationTriangle } from 'react-icons/fa';
+import { FaBitcoin, FaCheckCircle, FaClock, FaExclamationTriangle, FaArrowRight } from 'react-icons/fa';
 
 interface VerificationStatusProps {
   status: 'pending' | 'verified' | 'failed';
@@ -7,6 +7,7 @@ interface VerificationStatusProps {
   verificationAmount: number;
   error?: string;
   onDismiss?: () => void;
+  onManualVerify?: () => void;
 }
 
 const VerificationStatus: React.FC<VerificationStatusProps> = ({
@@ -15,6 +16,7 @@ const VerificationStatus: React.FC<VerificationStatusProps> = ({
   verificationAmount,
   error,
   onDismiss,
+  onManualVerify,
 }) => {
   useEffect(() => {
     console.log('VerificationStatus rendered with:', { status, onDismiss: !!onDismiss });
@@ -56,7 +58,7 @@ const VerificationStatus: React.FC<VerificationStatusProps> = ({
       <div className="text-center mb-6">
         {getStatusIcon()}
         <h4 className="text-lg font-semibold mt-2">{getStatusMessage()}</h4>
-        {error && <p className="text-red-500 mt-2">{error}</p>}
+        {error && status !== 'failed' && <p className="text-red-500 mt-2">{error}</p>}
       </div>
 
       {status === 'pending' && (
@@ -72,9 +74,17 @@ const VerificationStatus: React.FC<VerificationStatusProps> = ({
           </div>
 
           <div className="text-sm text-gray-500">
-            <p>Please send exactly {verificationAmount} sats from your store's Bitcoin address.</p>
+            <p>Please send exactly {verificationAmount} sats to your store's Bitcoin address.</p>
             <p className="mt-2">The verification process may take a few minutes after the transaction is confirmed.</p>
           </div>
+          
+          {onManualVerify && (
+            <div className="mt-4 p-3 bg-blue-50 border border-blue-100 rounded-md">
+              <p className="text-sm text-blue-700 mb-2">
+                <span className="font-semibold">Already sent the payment?</span> You can verify your store immediately by entering the transaction ID.
+              </p>
+            </div>
+          )}
         </div>
       )}
 
@@ -86,7 +96,7 @@ const VerificationStatus: React.FC<VerificationStatusProps> = ({
               onClick={onDismiss}
               className="btn btn-primary"
             >
-              OK
+              Continue to Dashboard
             </button>
           )}
         </div>
@@ -95,7 +105,15 @@ const VerificationStatus: React.FC<VerificationStatusProps> = ({
       {status === 'failed' && (
         <div className="text-center">
           <p className="text-red-500 mb-4">{error}</p>
-          <p className="text-sm text-gray-600">Please try the verification process again.</p>
+          <p className="text-sm text-gray-600 mb-4">Please try the verification process again.</p>
+          {onManualVerify && (
+            <button 
+              onClick={onManualVerify}
+              className="btn btn-outline flex items-center justify-center"
+            >
+              Try Manual Verification <FaArrowRight className="ml-2" />
+            </button>
+          )}
         </div>
       )}
     </div>

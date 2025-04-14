@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FaBitcoin, FaCheckCircle, FaClock, FaExclamationTriangle } from 'react-icons/fa';
 
 interface VerificationStatusProps {
@@ -6,6 +6,7 @@ interface VerificationStatusProps {
   storeAddress: string;
   verificationAmount: number;
   error?: string;
+  onDismiss?: () => void;
 }
 
 const VerificationStatus: React.FC<VerificationStatusProps> = ({
@@ -13,7 +14,12 @@ const VerificationStatus: React.FC<VerificationStatusProps> = ({
   storeAddress,
   verificationAmount,
   error,
+  onDismiss,
 }) => {
+  useEffect(() => {
+    console.log('VerificationStatus rendered with:', { status, onDismiss: !!onDismiss });
+  }, [status, onDismiss]);
+
   const getStatusIcon = () => {
     switch (status) {
       case 'verified':
@@ -73,8 +79,16 @@ const VerificationStatus: React.FC<VerificationStatusProps> = ({
       )}
 
       {status === 'verified' && (
-        <div className="text-center text-green-600">
-          <p>Your store is now verified and visible in the directory!</p>
+        <div className="text-center">
+          <p className="text-green-600 mb-4">Your store is now verified and visible in the directory!</p>
+          {onDismiss && (
+            <button 
+              onClick={onDismiss}
+              className="btn btn-primary"
+            >
+              OK
+            </button>
+          )}
         </div>
       )}
 

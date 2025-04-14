@@ -68,16 +68,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
       }
 
       setVerificationStatus('verified');
-      
-      // Close modal after 3 seconds on success
-      setTimeout(() => {
-        onClose();
-        // Reset state for next time
-        setStep('register');
-        setStoreData(null);
-        setVerificationStatus('pending');
-        setError('');
-      }, 3000);
+      console.log('Verification successful, status set to verified');
     } catch (err) {
       console.error('Verification error:', err);
       setVerificationStatus('failed');
@@ -127,6 +118,15 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
                     storeAddress={storeData.btc_address}
                     verificationAmount={5000}
                     error={error}
+                    onDismiss={() => {
+                      console.log('OK button clicked, dismissing verification status');
+                      onClose();
+                      // Reset state for next time
+                      setStep('register');
+                      setStoreData(null);
+                      setVerificationStatus('pending');
+                      setError('');
+                    }}
                   />
 
                   {verificationStatus === 'pending' && (

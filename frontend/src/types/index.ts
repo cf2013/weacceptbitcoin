@@ -8,6 +8,7 @@ export interface Store {
   reviews: Review[];
   created_at: string;
   updated_at: string;
+  website?: string;
 }
 
 export interface Review {

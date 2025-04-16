@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { FaSearch } from 'react-icons/fa';
+import Link from 'next/link';
 import StoreCard from '@/components/StoreCard';
 import { Store, Review } from '@/types';
 
@@ -69,6 +70,16 @@ export default function StoresPage() {
 
   return (
     <div className="container mx-auto px-4 py-8">
+      {/* Back to Main Page Button */}
+      <div className="mb-8">
+        <Link 
+          href="/"
+          className="inline-flex items-center px-4 py-2 bg-bitcoin-orange text-white rounded-lg hover:bg-bitcoin-orange-dark transition-colors"
+        >
+          ← Back to Main Page
+        </Link>
+      </div>
+
       {/* Search Section */}
       <section className="mb-12">
         <div className="max-w-2xl mx-auto">

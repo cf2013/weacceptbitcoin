@@ -83,6 +83,9 @@ export default function StoresPage() {
       {/* Search Section */}
       <section className="mb-12">
         <div className="max-w-2xl mx-auto">
+          <p className="text-center text-gray-400 italic text-lg mb-6 font-serif">
+            Don't spend your sats — exchange with class.
+          </p>
           <div className="relative">
             <input
               type="text"

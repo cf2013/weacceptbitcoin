@@ -43,14 +43,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ storeId, onSubmit, isLoading = 
       </div>
 
       <div>
-        <label htmlFor="text" className="label">
+        <label htmlFor="comment" className="label">
           Review
         </label>
         <textarea
-          id="text"
+          id="comment"
           className="input"
           rows={4}
-          {...register('text')}
+          {...register('comment')}
         />
       </div>
 

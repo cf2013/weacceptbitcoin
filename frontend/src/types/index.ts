@@ -18,6 +18,7 @@ export interface Review {
   created_at: string;
   txid: string;
   store_id: string;
+  verified: boolean;
 }
 
 export interface ApiResponse<T> {

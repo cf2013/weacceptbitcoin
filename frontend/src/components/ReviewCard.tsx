@@ -45,8 +45,8 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
         </div>
       </div>
 
-      {review.text && (
-        <p className="mt-2 text-gray-700">{review.text}</p>
+      {review.comment && (
+        <p className="mt-2 text-gray-700">{review.comment}</p>
       )}
 
       <div className="mt-3 text-xs text-gray-500">

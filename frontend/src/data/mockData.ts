@@ -15,7 +15,8 @@ export const mockStores: Store[] = [
         comment: 'Great coffee and smooth Bitcoin payment process!',
         created_at: '2024-02-20T10:00:00Z',
         txid: '1234567890abcdef',
-        store_id: '1'
+        store_id: '1',
+        verified: true
       }
     ],
     created_at: '2024-02-01T00:00:00Z',

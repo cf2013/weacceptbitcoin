@@ -4,6 +4,7 @@ import logging
 from typing import Optional, Dict, Any, Callable
 import os
 from dotenv import load_dotenv
+import random
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -14,8 +15,16 @@ load_dotenv()
 class TransactionMonitor:
     def __init__(self):
         self.mempool_api_url = os.getenv("MEMPOOL_API_URL", "https://mempool.space/api")
-        self.verification_amount = 5000  # 5,000 sats minimum for verification
+        self.verification_amount = self._generate_verification_amount()
         self._monitoring_tasks = {}
+
+    def _generate_verification_amount(self) -> int:
+        """Generate a random verification amount between 1000 and 5000 sats."""
+        return random.randint(1000, 5000)
+
+    def get_verification_amount(self) -> int:
+        """Get the current verification amount."""
+        return self.verification_amount
 
     async def get_transaction(self, txid: str) -> Optional[Dict[str, Any]]:
         """Fetch transaction details from Mempool.space API."""

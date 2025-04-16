@@ -117,10 +117,6 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
             </button>
 
             <div className="p-6">
-              <h2 className="text-2xl font-bold mb-6 text-center">
-                {step === 'register' ? 'Register Your Store' : 'Verify Your Store'}
-              </h2>
-
               {step === 'register' && (
                 <StoreForm
                   onSubmit={handleStoreSubmit}
@@ -133,7 +129,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
                   <VerificationStatus
                     status={verificationStatus}
                     storeAddress={storeData.btc_address}
-                    verificationAmount={5000}
+                    verificationAmount={storeData.verification_amount ?? 5000}
                     error={error}
                     onDismiss={() => {
                       console.log('OK button clicked, dismissing verification status');
@@ -148,6 +144,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
                       isLoading={isLoading}
                       type="store"
                       address={storeData.btc_address}
+                      verificationAmount={storeData.verification_amount ?? 5000}
                     />
                   )}
                 </div>

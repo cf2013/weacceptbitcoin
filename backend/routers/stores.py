@@ -3,8 +3,10 @@ from pydantic import BaseModel, constr, UUID4
 from typing import Optional, List
 from supabase_client import get_store, get_stores, create_store, update_store, get_reviews
 from services.bitcoin import verify_transaction
+from services.transaction_monitor import TransactionMonitor
 
 router = APIRouter()
+transaction_monitor = TransactionMonitor()
 
 class StoreBase(BaseModel):
     name: str
@@ -98,6 +100,7 @@ async def create_new_store(store: StoreCreate):
     try:
         store_data = store.model_dump()
         store_data["verified"] = False  # New stores are unverified by default
+        store_data["verification_amount"] = transaction_monitor.get_verification_amount()
         response = create_store(store_data)
         if not response:
             raise HTTPException(status_code=500, detail="Failed to create store")

@@ -8,6 +8,7 @@ interface VerificationFormProps {
   isLoading?: boolean;
   type: 'store' | 'review';
   address?: string;
+  verificationAmount?: number;
 }
 
 const VerificationForm: React.FC<VerificationFormProps> = ({
@@ -15,6 +16,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
   isLoading = false,
   type,
   address,
+  verificationAmount,
 }) => {
   const {
     register,
@@ -31,6 +33,18 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
   return (
     <div className="card bg-gray-50">
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        {type === 'store' && verificationAmount && (
+          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
+            <p className="text-sm text-blue-800">
+              Please send exactly <span className="font-bold">{verificationAmount} sats</span> to verify your store ownership.
+            </p>
+            {address && (
+              <p className="text-sm text-blue-800 mt-1">
+                Send to address: <span className="font-mono">{address}</span>
+              </p>
+            )}
+          </div>
+        )}
         <div>
           <label htmlFor="txid" className="label">
             Bitcoin Transaction ID (TXID) *

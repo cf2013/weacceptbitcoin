@@ -19,14 +19,16 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div>
-        <label htmlFor="name" className="label">
+      <div className="form-group">
+        <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
           Store Name *
         </label>
         <input
           id="name"
           type="text"
-          className={`input ${errors.name ? 'border-red-500' : ''}`}
+          className={`w-full px-4 py-2 border-2 rounded-lg focus:ring-2 focus:ring-bitcoin-orange focus:border-bitcoin-orange transition-colors ${
+            errors.name ? 'border-red-500' : 'border-gray-300'
+          }`}
           {...register('name', { required: 'Store name is required' })}
         />
         {errors.name && (
@@ -34,50 +36,52 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
         )}
       </div>
 
-      <div>
-        <label htmlFor="description" className="label">
+      <div className="form-group">
+        <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
           Description
         </label>
         <textarea
           id="description"
-          className="input"
+          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-bitcoin-orange focus:border-bitcoin-orange transition-colors"
           rows={4}
           {...register('description')}
         />
       </div>
 
-      <div>
-        <label htmlFor="category" className="label">
+      <div className="form-group">
+        <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
           Category
         </label>
         <input
           id="category"
           type="text"
-          className="input"
+          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-bitcoin-orange focus:border-bitcoin-orange transition-colors"
           {...register('category')}
         />
       </div>
 
-      <div>
-        <label htmlFor="website" className="label">
+      <div className="form-group">
+        <label htmlFor="website" className="block text-sm font-medium text-gray-700 mb-1">
           Website
         </label>
         <input
           id="website"
           type="url"
-          className="input"
+          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-bitcoin-orange focus:border-bitcoin-orange transition-colors"
           {...register('website')}
         />
       </div>
 
-      <div>
-        <label htmlFor="btc_address" className="label">
+      <div className="form-group">
+        <label htmlFor="btc_address" className="block text-sm font-medium text-gray-700 mb-1">
           Bitcoin Address *
         </label>
         <input
           id="btc_address"
           type="text"
-          className={`input ${errors.btc_address ? 'border-red-500' : ''}`}
+          className={`w-full px-4 py-2 border-2 rounded-lg focus:ring-2 focus:ring-bitcoin-orange focus:border-bitcoin-orange transition-colors ${
+            errors.btc_address ? 'border-red-500' : 'border-gray-300'
+          }`}
           {...register('btc_address', { required: 'Bitcoin address is required' })}
         />
         {errors.btc_address && (
@@ -91,7 +95,7 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
       <div className="pt-4">
         <button
           type="submit"
-          className="btn btn-primary w-full"
+          className="w-full bg-bitcoin-orange text-white py-3 px-4 rounded-lg font-medium hover:bg-bitcoin-orange-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={isLoading}
         >
           {isLoading ? 'Saving...' : initialData ? 'Update Store' : 'Add Store'}

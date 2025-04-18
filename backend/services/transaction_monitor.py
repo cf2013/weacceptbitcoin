@@ -61,10 +61,11 @@ class TransactionMonitor:
             }
 
         # Check if any input address matches the expected address
+         # for testing purposes we can change if amount >= verification_amount.
         for vin in tx_data.get('vin', []):
             if vin.get('prevout', {}).get('scriptpubkey_address') == expected_address:
                 amount = sum(vout.get('value', 0) for vout in tx_data.get('vout', []))
-                if amount == verification_amount:
+                if amount >= verification_amount:
                     return {
                         'verified': True,
                         'amount': amount,

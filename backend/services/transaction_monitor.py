@@ -15,7 +15,6 @@ load_dotenv()
 class TransactionMonitor:
     def __init__(self):
         self.mempool_api_url = os.getenv("MEMPOOL_API_URL", "https://mempool.space/api")
-        self.verification_amount = self._generate_verification_amount()
         self._monitoring_tasks = {}
 
     def _generate_verification_amount(self) -> int:
@@ -23,8 +22,8 @@ class TransactionMonitor:
         return random.randint(1000, 5000)
 
     def get_verification_amount(self) -> int:
-        """Get the current verification amount."""
-        return self.verification_amount
+        """Get a new verification amount for each store."""
+        return self._generate_verification_amount()
 
     async def get_transaction(self, txid: str) -> Optional[Dict[str, Any]]:
         """Fetch transaction details from Mempool.space API."""
@@ -42,7 +41,7 @@ class TransactionMonitor:
                 logger.error(f"Unexpected error fetching transaction {txid}: {str(e)}")
                 return None
 
-    async def verify_store_transaction(self, txid: str, expected_address: str) -> Dict[str, Any]:
+    async def verify_store_transaction(self, txid: str, expected_address: str, verification_amount: int) -> Dict[str, Any]:
         """
         Verify that a transaction was sent from the expected Bitcoin address.
         Returns a dictionary with verification status and details.
@@ -65,7 +64,7 @@ class TransactionMonitor:
         for vin in tx_data.get('vin', []):
             if vin.get('prevout', {}).get('scriptpubkey_address') == expected_address:
                 amount = sum(vout.get('value', 0) for vout in tx_data.get('vout', []))
-                if amount >= self.verification_amount:
+                if amount == verification_amount:
                     return {
                         'verified': True,
                         'amount': amount,
@@ -74,7 +73,7 @@ class TransactionMonitor:
                 else:
                     return {
                         'verified': False,
-                        'error': f'Transaction amount ({amount} sats) is less than required ({self.verification_amount} sats)'
+                        'error': f'Transaction amount ({amount} sats) must be exactly {verification_amount} sats'
                     }
 
         return {

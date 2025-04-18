@@ -135,10 +135,14 @@ async def verify_store(store_id: str, verification: VerificationRequest):
         if not store.get('btc_address'):
             raise HTTPException(status_code=400, detail="Store has no Bitcoin address")
             
+        if not store.get('verification_amount'):
+            raise HTTPException(status_code=400, detail="Store has no verification amount set")
+            
         # Verify the transaction
         verification_result = verify_transaction(
             txid=verification.txid,
-            expected_address=store['btc_address']
+            expected_address=store['btc_address'],
+            min_amount=store['verification_amount']
         )
         
         if not verification_result['verified']:

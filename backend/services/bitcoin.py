@@ -8,14 +8,14 @@ load_dotenv()
 
 MEMPOOL_API_URL = os.getenv('MEMPOOL_API_URL', 'https://mempool.space/api')
 
-def verify_transaction(txid: str, expected_address: str, min_amount: int = 5000) -> Dict:
+def verify_transaction(txid: str, expected_address: str, min_amount: int) -> Dict:
     """
     Verify a Bitcoin transaction using Mempool.space API.
     
     Args:
         txid: The transaction ID to verify
         expected_address: The Bitcoin address that should receive the payment
-        min_amount: Minimum amount in sats required for verification (default: 5000)
+        min_amount: The exact amount in sats required for verification
     
     Returns:
         Dict containing verification status and details
@@ -37,10 +37,15 @@ def verify_transaction(txid: str, expected_address: str, min_amount: int = 5000)
         for output in tx_data.get('vout', []):
             if output.get('scriptpubkey_address') == expected_address:
                 amount = output.get('value', 0)
-                if amount >= min_amount:
+                if amount == min_amount:
                     return {
                         'verified': True,
                         'amount': amount
+                    }
+                else:
+                    return {
+                        'verified': False,
+                        'error': f'Transaction amount ({amount} sats) must be exactly {min_amount} sats'
                     }
         
         return {

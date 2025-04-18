@@ -79,7 +79,6 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
       }
 
       setVerificationStatus('verified');
-      console.log('Verification successful, status set to verified');
     } catch (err) {
       console.error('Verification error:', err);
       setVerificationStatus('failed');
@@ -87,12 +86,6 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const handleManualVerify = () => {
-    // This function will be passed to VerificationStatus to allow manual verification
-    setVerificationStatus('pending');
-    setError('');
   };
 
   if (!isOpen) return null;
@@ -125,19 +118,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
               )}
 
               {step === 'verify' && storeData && (
-                <div className="space-y-6">
-                  <VerificationStatus
-                    status={verificationStatus}
-                    storeAddress={storeData.btc_address}
-                    verificationAmount={storeData.verification_amount ?? 5000}
-                    error={error}
-                    onDismiss={() => {
-                      console.log('OK button clicked, dismissing verification status');
-                      onClose();
-                    }}
-                    onManualVerify={handleManualVerify}
-                  />
-
+                <>
                   {verificationStatus === 'pending' && (
                     <VerificationForm
                       onSubmit={handleVerificationSubmit}
@@ -147,11 +128,19 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
                       verificationAmount={storeData.verification_amount ?? 5000}
                     />
                   )}
-                </div>
+
+                  {verificationStatus !== 'pending' && (
+                    <VerificationStatus
+                      status={verificationStatus}
+                      error={error}
+                      onDismiss={onClose}
+                    />
+                  )}
+                </>
               )}
 
-              {/* Only show error in the register step or if there's no VerificationStatus component */}
-              {error && (step === 'register' || !storeData) && (
+              {/* Only show error in the register step */}
+              {error && step === 'register' && (
                 <div className="mt-4 p-4 bg-red-50 text-red-500 rounded-md">
                   {error}
                 </div>

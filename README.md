@@ -1,19 +1,25 @@
-# We Accept Bitcoin - Store Directory
+# We Accept Bitcoin - Store Directory 
 
 A directory of Bitcoin-accepting stores with verified reviews based on on-chain transactions.
 
 ## Features
 
-- Store verification using Bitcoin transactions
-- Verified customer reviews tied to Bitcoin payments
-- Modern, responsive UI for store discovery
-- Real-time transaction monitoring
+- Store onboarding using Bitcoin transaction
+    -Verify a store by sending the exact small amount to store owner address.
+
+- Display verified stores in a store directory
+    -Search box available to filter stores by different criteria
+    -Display store details
+
+- Verified customer reviews
+    -Review and rate a verified store directly.
+    -As people consume and pay in a verified store transactions are monitored for rating and comments.
 
 ## Tech Stack
 
 - Frontend: Next.js + React
 - Backend: Python + FastAPI
-- Database: PostgreSQL (Supabase)
+- Database: PostgreSQL
 - Blockchain Access: Mempool.space API
 
 ## Project Structure
@@ -78,18 +84,6 @@ cp .env.example .env.local
 ```bash
 npm run dev
 ```
-
-## API Documentation
-
-Once the backend server is running, visit `/docs` for the interactive API documentation.
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 

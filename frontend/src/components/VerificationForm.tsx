@@ -31,28 +31,30 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
   }, [reset]);
 
   return (
-    <div className="card bg-gray-50">
+    <div className="card bg-white p-6 rounded-lg shadow-sm">
+      <div className="flex items-center justify-center mb-6">
+        <FaBitcoin className="text-bitcoin-orange text-2xl mr-2" />
+        <h3 className="text-xl font-bold">Verify Your Store</h3>
+      </div>
+
+      <div className="mb-6 p-4 bg-blue-50 rounded-lg">
+        <p className="text-sm text-blue-800 mb-2">
+          To verify your store ownership, please send exactly <span className="font-bold">{verificationAmount} sats</span> to:
+        </p>
+        <div className="bg-white p-3 rounded border border-blue-100 break-all">
+          <p className="font-mono text-sm">{address}</p>
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {type === 'store' && verificationAmount && (
-          <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800">
-              Please send exactly <span className="font-bold">{verificationAmount} sats</span> to verify your store ownership.
-            </p>
-            {address && (
-              <p className="text-sm text-blue-800 mt-1">
-                Send to address: <span className="font-mono">{address}</span>
-              </p>
-            )}
-          </div>
-        )}
         <div>
-          <label htmlFor="txid" className="label">
-            Bitcoin Transaction ID (TXID) *
+          <label htmlFor="txid" className="block text-sm font-medium text-gray-700 mb-1">
+            Bitcoin Transaction ID (TXID)
           </label>
           <input
             id="txid"
             type="text"
-            className={`input ${errors.txid ? 'border-red-500' : ''}`}
+            className={`w-full px-3 py-2 border rounded-md ${errors.txid ? 'border-red-500' : 'border-gray-300'}`}
             placeholder="Enter the transaction ID from your Bitcoin wallet"
             {...register('txid', { required: 'Transaction ID is required' })}
           />
@@ -64,7 +66,7 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
         <div className="pt-2">
           <button
             type="submit"
-            className="btn btn-primary w-full flex items-center justify-center"
+            className="w-full bg-bitcoin-orange hover:bg-bitcoin-orange-dark text-white py-2 px-4 rounded-md flex items-center justify-center transition-colors"
             disabled={isLoading}
           >
             {isLoading ? 'Verifying...' : 'Verify Store'}
@@ -72,14 +74,6 @@ const VerificationForm: React.FC<VerificationFormProps> = ({
           </button>
         </div>
       </form>
-
-      <div className="mt-4 text-sm text-gray-500">
-        <p>
-          {type === 'store'
-            ? 'Verification helps build trust with customers and ensures you control the Bitcoin address. Your store will be listed in our directory once verified.'
-            : 'Verified reviews help other customers make informed decisions.'}
-        </p>
-      </div>
     </div>
   );
 };

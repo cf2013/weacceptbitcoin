@@ -12,12 +12,14 @@ class StoreBase(BaseModel):
     name: str
     description: Optional[str] = None
     category: Optional[str] = None
+    website: Optional[str] = None
     btc_address: Optional[constr(min_length=26, max_length=100)] = None
 
 class StoreCreate(BaseModel):
     name: str
     description: Optional[str] = None
     category: Optional[str] = None
+    website: Optional[str] = None
     btc_address: constr(min_length=26, max_length=100)  # Required for creation
 
 class Store(StoreCreate):

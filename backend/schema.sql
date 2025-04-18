@@ -7,6 +7,7 @@ create table if not exists stores (
     name text not null,
     description text,
     category text,
+    website text,
     btc_address text not null,
     verified boolean default false,
     verification_txid text,

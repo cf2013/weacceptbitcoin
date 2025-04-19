@@ -1,6 +1,7 @@
 import os
 from dotenv import load_dotenv
 from supabase_client import get_stores, get_store, create_store, update_store, get_reviews, create_review
+import requests
 
 def main():
     # Load environment variables
@@ -53,5 +54,39 @@ def main():
         reviews = get_reviews(store_id)
         print(f"Found {len(reviews)} reviews for store {store_id}")
 
+# Supabase configuration
+SUPABASE_URL = os.getenv('SUPABASE_URL')
+SUPABASE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY') or os.getenv('SUPABASE_KEY')
+
+if not SUPABASE_URL or not SUPABASE_KEY:
+    raise ValueError("SUPABASE_URL and SUPABASE_KEY must be set in .env file")
+
+# Headers for Supabase REST API
+headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': f'Bearer {SUPABASE_KEY}',
+    'Content-Type': 'application/json',
+    'Prefer': 'return=representation'
+}
+
+def test_get_reviews():
+    """Test getting reviews from Supabase."""
+    store_id = "0f603e72-af32-4acd-9161-d5f7e4e80cd3"  # Microstrategy's ID
+    url = f"{SUPABASE_URL}/rest/v1/reviews?store_id=eq.{store_id}"
+    
+    print(f"Fetching reviews from URL: {url}")
+    print(f"Using headers: {headers}")
+    
+    try:
+        response = requests.get(url, headers=headers)
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.text}")
+        return response.json() if response.ok else None
+    except Exception as e:
+        print(f"Exception in test_get_reviews: {str(e)}")
+        return None
+
 if __name__ == "__main__":
-    main() 
+    main()
+    reviews = test_get_reviews()
+    print("\nReviews:", reviews) 

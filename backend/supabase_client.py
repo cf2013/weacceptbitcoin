@@ -30,6 +30,12 @@ headers = {
 def handle_response(response: requests.Response) -> SupabaseResponse:
     """Handle the API response and return a consistent response object."""
     try:
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.text[:500]}")  # Print first 500 chars to avoid huge logs
+        
+        if response.status_code == 404:
+            return SupabaseResponse(data=[])
+            
         response.raise_for_status()
         data = response.json()
         
@@ -37,14 +43,15 @@ def handle_response(response: requests.Response) -> SupabaseResponse:
         if isinstance(data, (list, dict)):
             return SupabaseResponse(data=data)
             
-        # If it's something else, return None data
-        return SupabaseResponse(data=None)
+        # If it's something else, return empty list
+        return SupabaseResponse(data=[])
     except requests.exceptions.HTTPError as e:
         print(f"HTTP Error: {e}")
         print(f"Response content: {response.text}")
         return SupabaseResponse(error=str(e))
     except Exception as e:
         print(f"Error: {e}")
+        print(f"Response content: {response.text}")
         return SupabaseResponse(error=str(e))
 
 def get_stores() -> List[Dict]:
@@ -91,23 +98,53 @@ def update_store(store_id: str, update_data: Dict) -> Optional[Dict]:
         return result.data[0]
     return result.data if isinstance(result.data, dict) else None
 
-def get_reviews(store_id: str) -> List[Dict]:
-    """Get all reviews for a specific store."""
-    response = requests.get(
-        f"{SUPABASE_URL}/rest/v1/reviews?store_id=eq.{store_id}&select=*",
-        headers=headers
-    )
-    result = handle_response(response)
-    return result.data if isinstance(result.data, list) else []
+def get_reviews(store_id: Optional[str] = None) -> SupabaseResponse:
+    """Get all reviews for a specific store or all reviews if store_id is None."""
+    url = f"{SUPABASE_URL}/rest/v1/reviews"
+    
+    if store_id:
+        url += f"?store_id=eq.{store_id}"
+    
+    print(f"Fetching reviews from URL: {url}")
+    print(f"Using headers: {headers}")
+    
+    try:
+        response = requests.get(
+            url,
+            headers=headers
+        )
+        print(f"Response status code: {response.status_code}")
+        print(f"Response content: {response.text[:500]}")  # Print first 500 chars to avoid huge logs
+        
+        if response.status_code == 404:
+            print("No reviews found (404)")
+            return SupabaseResponse(data=[])
+            
+        if not response.ok:
+            print(f"Error response: {response.text}")
+            return SupabaseResponse(error=f"HTTP {response.status_code}: {response.text}")
+            
+        return handle_response(response)
+    except Exception as e:
+        print(f"Exception in get_reviews: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        return SupabaseResponse(error=str(e))
 
-def create_review(review_data: Dict) -> Optional[Dict]:
+def create_review(review_data: Dict) -> SupabaseResponse:
     """Create a new review."""
     response = requests.post(
         f"{SUPABASE_URL}/rest/v1/reviews",
         headers=headers,
         json=review_data
     )
-    result = handle_response(response)
-    if isinstance(result.data, list) and len(result.data) > 0:
-        return result.data[0]
-    return result.data if isinstance(result.data, dict) else None 
+    return handle_response(response)
+
+def update_review(review_id: str, update_data: Dict) -> SupabaseResponse:
+    """Update a review by ID."""
+    response = requests.patch(
+        f"{SUPABASE_URL}/rest/v1/reviews?id=eq.{review_id}",
+        headers=headers,
+        json=update_data
+    )
+    return handle_response(response) 

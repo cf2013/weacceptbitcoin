@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, status
 from typing import List, Optional
 from pydantic import BaseModel, constr
 from services.transaction_monitor import TransactionMonitor
-from supabase_client import get_reviews, create_review, get_store
+from supabase_client import get_reviews, create_review, get_store, update_review
 
 router = APIRouter()
 transaction_monitor = TransactionMonitor()
@@ -16,10 +16,15 @@ class ReviewBase(BaseModel):
 class ReviewCreate(ReviewBase):
     pass
 
-class Review(ReviewBase):
+class Review(BaseModel):  # Changed from ReviewBase to BaseModel
     id: str
+    store_id: str
+    rating: int
+    comment: Optional[str] = None
+    txid: str  # Removed length validation for existing reviews
     created_at: str
     updated_at: str
+    verified: bool = False
 
 @router.post("", response_model=Review)
 async def create_new_review(review: ReviewCreate):
@@ -27,7 +32,7 @@ async def create_new_review(review: ReviewCreate):
     try:
         # Check if store exists
         store = get_store(review.store_id)
-        if not store.data:
+        if not store:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Store not found"
@@ -35,24 +40,62 @@ async def create_new_review(review: ReviewCreate):
 
         # Create review
         response = create_review(review.dict())
-        return response.data[0]
+        if response.error:
+            raise HTTPException(status_code=500, detail=response.error)
+            
+        if not response.data:
+            raise HTTPException(status_code=500, detail="Failed to create review")
+            
+        if isinstance(response.data, list) and len(response.data) > 0:
+            return response.data[0]
+            
+        if isinstance(response.data, dict):
+            return response.data
+            
+        raise HTTPException(status_code=500, detail="Unexpected response format")
     except Exception as e:
+        print(f"Exception in create_new_review: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/store/{store_id}", response_model=List[Review])
 async def list_store_reviews(store_id: str):
     try:
+        print(f"Fetching reviews for store ID: {store_id}")
         response = get_reviews(store_id)
+        print(f"Response from get_reviews: {response}")
+        
+        if response.error:
+            print(f"Error in get_reviews: {response.error}")
+            raise HTTPException(status_code=500, detail=response.error)
+            
+        if not response.data:
+            print("No reviews found")
+            return []
+            
+        if not isinstance(response.data, list):
+            print(f"Unexpected response data type: {type(response.data)}")
+            return []
+            
         return response.data
     except Exception as e:
+        print(f"Exception in list_store_reviews: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/{review_id}", response_model=Review)
 async def get_review(review_id: str):
     """Get a specific review by ID."""
     try:
-        reviews = get_reviews(None)  # Get all reviews
-        review = next((r for r in reviews.data if r["id"] == review_id), None)
+        response = get_reviews(None)  # Get all reviews
+        if response.error:
+            raise HTTPException(status_code=500, detail=response.error)
+            
+        reviews = response.data if isinstance(response.data, list) else []
+        review = next((r for r in reviews if r["id"] == review_id), None)
+        
         if not review:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -66,8 +109,13 @@ async def get_review(review_id: str):
 async def verify_review(review_id: str):
     """Verify a review using its associated Bitcoin transaction."""
     try:
-        reviews = get_reviews(None)  # Get all reviews
-        review = next((r for r in reviews.data if r["id"] == review_id), None)
+        response = get_reviews(None)  # Get all reviews
+        if response.error:
+            raise HTTPException(status_code=500, detail=response.error)
+            
+        reviews = response.data if isinstance(response.data, list) else []
+        review = next((r for r in reviews if r["id"] == review_id), None)
+        
         if not review:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -82,14 +130,14 @@ async def verify_review(review_id: str):
 
         # Get the store's Bitcoin address
         store = get_store(review["store_id"])
-        if not store.data:
+        if not store:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Associated store not found"
             )
 
         # Verify the transaction
-        is_valid = await transaction_monitor.verify_review_transaction(review["txid"], store.data["btc_address"])
+        is_valid = await transaction_monitor.verify_review_transaction(review["txid"], store["btc_address"])
         if not is_valid:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
@@ -97,7 +145,10 @@ async def verify_review(review_id: str):
             )
 
         # Update review verification status
-        # TODO: Add update_review function to supabase_client
+        update_response = update_review(review_id, {"verified": True})
+        if update_response.error:
+            raise HTTPException(status_code=500, detail=update_response.error)
+            
         return {"status": "success", "message": "Review verified successfully"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e)) 

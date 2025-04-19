@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaBitcoin, FaStar, FaCheckCircle, FaTimesCircle, FaTimes, FaGlobe } from 'react-icons/fa';
-import { Store } from '@/types';
+import { Store, Review } from '@/types';
 import ReviewCard from './ReviewCard';
+import ReviewForm from './ReviewForm';
 
 interface StoreDetailsModalProps {
   store: Store;
@@ -9,12 +10,75 @@ interface StoreDetailsModalProps {
   onClose: () => void;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+
 const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, onClose }) => {
+  const [reviews, setReviews] = useState<Review[]>(store.reviews || []);
+  const [isLoadingReviews, setIsLoadingReviews] = useState(false);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch reviews if they're not already available
+  useEffect(() => {
+    if (isOpen && (!store.reviews || store.reviews.length === 0)) {
+      fetchReviews();
+    }
+  }, [isOpen, store.id]);
+
+  const fetchReviews = async () => {
+    try {
+      setIsLoadingReviews(true);
+      setError(null);
+      
+      const response = await fetch(`${API_URL}/api/reviews/store/${store.id}`);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch reviews: ${response.statusText}`);
+      }
+      
+      const fetchedReviews = await response.json();
+      setReviews(fetchedReviews);
+    } catch (err) {
+      console.error('Error fetching reviews:', err);
+      setError('Failed to load reviews. Please try again later.');
+    } finally {
+      setIsLoadingReviews(false);
+    }
+  };
+
+  const handleReviewSubmit = async (reviewData: any) => {
+    try {
+      setIsSubmittingReview(true);
+      setError(null);
+      
+      const response = await fetch(`${API_URL}/api/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(reviewData),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to submit review: ${response.statusText}`);
+      }
+      
+      const newReview = await response.json();
+      setReviews([...reviews, newReview]);
+      setShowReviewForm(false);
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      setError('Failed to submit review. Please try again later.');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   if (!isOpen) return null;
 
   // Calculate average rating
-  const averageRating = store.reviews && store.reviews.length > 0
-    ? store.reviews.reduce((acc, review) => acc + review.rating, 0) / store.reviews.length
+  const averageRating = reviews && reviews.length > 0
+    ? reviews.reduce((acc, review) => acc + review.rating, 0) / reviews.length
     : 0;
 
   return (
@@ -106,7 +170,7 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
                     ))}
                   </div>
                   <span className="ml-2">
-                    {averageRating.toFixed(1)} ({store.reviews?.length || 0} reviews)
+                    {averageRating.toFixed(1)} ({reviews.length} reviews)
                   </span>
                 </div>
               </div>
@@ -115,15 +179,46 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
 
           {/* Reviews Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Reviews</h3>
-            {store.reviews && store.reviews.length > 0 ? (
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Reviews</h3>
+              <button
+                onClick={() => setShowReviewForm(!showReviewForm)}
+                className="btn btn-outline btn-sm"
+              >
+                {showReviewForm ? 'Cancel' : 'Add Review'}
+              </button>
+            </div>
+
+            {error && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-md mb-4">
+                {error}
+              </div>
+            )}
+
+            {showReviewForm && (
+              <div className="mb-6 p-4 border rounded-md">
+                <h4 className="text-md font-semibold mb-3">Write a Review</h4>
+                <ReviewForm
+                  storeId={store.id}
+                  onSubmit={handleReviewSubmit}
+                  isLoading={isSubmittingReview}
+                />
+              </div>
+            )}
+
+            {isLoadingReviews ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-bitcoin-orange mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading reviews...</p>
+              </div>
+            ) : reviews.length > 0 ? (
               <div className="space-y-4">
-                {store.reviews.map((review) => (
+                {reviews.map((review) => (
                   <ReviewCard key={review.id} review={review} />
                 ))}
               </div>
             ) : (
-              <p className="text-gray-500">No reviews yet.</p>
+              <p className="text-gray-500 text-center py-8">No reviews yet. Be the first to review this store!</p>
             )}
           </div>
         </div>

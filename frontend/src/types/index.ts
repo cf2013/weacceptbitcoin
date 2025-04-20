@@ -46,9 +46,12 @@ export interface ReviewFormData {
   store_id: string;
   rating: number;
   comment: string;
-  txid: string;
+  txid?: string;
 }
 
 export interface VerificationFormData {
+  store_id: string;
   txid: string;
+  rating: string;
+  comment: string;
 } 

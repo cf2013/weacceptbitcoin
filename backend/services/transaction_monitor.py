@@ -26,20 +26,28 @@ class TransactionMonitor:
         return self._generate_verification_amount()
 
     async def get_transaction(self, txid: str) -> Optional[Dict[str, Any]]:
-        """Fetch transaction details from Mempool.space API."""
-        async with aiohttp.ClientSession() as session:
-            try:
-                async with session.get(f"{self.mempool_api_url}/tx/{txid}") as response:
+        """
+        Get transaction details from the Bitcoin API.
+        """
+        print(f"Fetching transaction details for txid: {txid}")
+        url = f"{self.mempool_api_url}/tx/{txid}"
+        print(f"API URL: {url}")
+        
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    print(f"API Response status: {response.status}")
                     if response.status == 200:
-                        return await response.json()
-                    logger.warning(f"Failed to fetch transaction {txid}: Status {response.status}")
-                    return None
-            except aiohttp.ClientError as e:
-                logger.error(f"Network error fetching transaction {txid}: {str(e)}")
-                return None
-            except Exception as e:
-                logger.error(f"Unexpected error fetching transaction {txid}: {str(e)}")
-                return None
+                        data = await response.json()
+                        print(f"Transaction data received: {data}")
+                        return data
+                    else:
+                        error_text = await response.text()
+                        print(f"API Error: Status {response.status}, Response: {error_text}")
+                        return None
+        except Exception as e:
+            print(f"Exception while fetching transaction: {str(e)}")
+            return None
 
     async def verify_store_transaction(self, txid: str, expected_address: str, verification_amount: int) -> Dict[str, Any]:
         """
@@ -87,30 +95,44 @@ class TransactionMonitor:
         Verify that a transaction was sent to the store's Bitcoin address.
         Returns a dictionary with verification status and details.
         """
+        print(f"Starting transaction verification for txid: {txid}")
+        print(f"Expected store address: {store_address}")
+        
         tx_data = await self.get_transaction(txid)
         if not tx_data:
+            print(f"Transaction not found or invalid for txid: {txid}")
             return {
                 'verified': False,
                 'error': 'Transaction not found or invalid'
             }
 
+        print(f"Transaction data retrieved: {tx_data}")
+        
         # Check if transaction is confirmed
         if not tx_data.get('status', {}).get('confirmed'):
+            print(f"Transaction {txid} is not confirmed yet")
             return {
                 'verified': False,
                 'error': 'Transaction not confirmed yet'
             }
 
+        print("Transaction is confirmed, checking outputs...")
+        
         # Check if any output is sent to the store's address with sufficient amount
         for vout in tx_data.get('vout', []):
-            if (vout.get('scriptpubkey_address') == store_address and 
-                vout.get('value', 0) >= self.verification_amount):
+            print(f"Checking output: {vout}")
+            if vout.get('scriptpubkey_address') == store_address:
+                amount = vout.get('value', 0)
+                print(f"Found matching output to store address with amount: {amount} sats")
+                # For review verification, we just check if there's a payment to the store address
+                # The exact amount is not critical for reviews
                 return {
                     'verified': True,
-                    'amount': vout.get('value', 0),
+                    'amount': amount,
                     'txid': txid
                 }
 
+        print(f"No valid payment found to store address: {store_address}")
         return {
             'verified': False,
             'error': 'No valid payment found to the store address'

@@ -26,6 +26,9 @@ class Review(BaseModel):  # Changed from ReviewBase to BaseModel
     updated_at: str
     verified: bool = False
 
+class VerificationRequest(BaseModel):
+    txid: constr(min_length=64, max_length=64)
+
 @router.post("", response_model=Review)
 async def create_new_review(review: ReviewCreate):
     """Create a new review."""
@@ -103,6 +106,54 @@ async def get_review(review_id: str):
             )
         return review
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/verify", response_model=dict)
+async def verify_review_transaction(store_id: str, verification: VerificationRequest):
+    """Verify a review transaction before creating the review."""
+    try:
+        print(f"Starting review transaction verification for store_id: {store_id}")
+        print(f"Verification request data: {verification}")
+        
+        # Check if store exists
+        store = get_store(store_id)
+        if not store:
+            print(f"Store not found with ID: {store_id}")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Store not found"
+            )
+        
+        print(f"Found store with Bitcoin address: {store['btc_address']}")
+
+        # Verify the transaction
+        print(f"Calling transaction_monitor.verify_review_transaction with txid: {verification.txid}")
+        verification_result = await transaction_monitor.verify_review_transaction(
+            verification.txid, 
+            store["btc_address"]
+        )
+        print(f"Verification result: {verification_result}")
+        
+        if not verification_result.get('verified', False):
+            error_msg = verification_result.get('error', 'Invalid review transaction')
+            print(f"Verification failed: {error_msg}")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=error_msg
+            )
+            
+        print("Transaction verified successfully")
+        return {
+            "status": "success", 
+            "message": "Transaction verified successfully",
+            "txid": verification.txid
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Exception in verify_review_transaction: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("/{review_id}/verify")

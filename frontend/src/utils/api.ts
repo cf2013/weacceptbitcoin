@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Store, Review, StoreFormData, ReviewFormData, ApiResponse } from '@/types';
+import { Store, Review, StoreFormData, ReviewFormData, VerificationFormData, ApiResponse } from '@/types';
 
 const API_URL = process.env.API_URL || 'http://localhost:8000/api';
 
@@ -49,5 +49,10 @@ export const createReview = async (reviewData: ReviewFormData): Promise<Review> 
 
 export const verifyReview = async (reviewId: string): Promise<ApiResponse<null>> => {
   const response = await api.post(`/reviews/${reviewId}/verify`);
+  return response.data;
+};
+
+export const verifyReviewTransaction = async (storeId: string, verificationData: VerificationFormData): Promise<ApiResponse<{ txid: string }>> => {
+  const response = await api.post(`/reviews/verify?store_id=${storeId}`, verificationData);
   return response.data;
 }; 

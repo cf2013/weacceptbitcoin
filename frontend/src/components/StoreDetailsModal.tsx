@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { FaBitcoin, FaStar, FaCheckCircle, FaTimesCircle, FaTimes, FaGlobe } from 'react-icons/fa';
-import { Store, Review } from '@/types';
+import { Store, Review, ReviewFormData, VerificationFormData } from '@/types';
 import ReviewCard from './ReviewCard';
 import ReviewForm from './ReviewForm';
+import { verifyReviewTransaction } from '@/utils/api';
 
 interface StoreDetailsModalProps {
   store: Store;
@@ -46,11 +47,43 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
     }
   };
 
-  const handleReviewSubmit = async (reviewData: any) => {
+  const handleReviewSubmit = async (reviewData: ReviewFormData) => {
+    // This function is now just a placeholder as the actual submission
+    // will happen after verification
+    console.log('Review data submitted:', reviewData);
+  };
+
+  const handleReviewVerify = async (verificationData: VerificationFormData) => {
     try {
+      console.log('Starting review verification process...');
+      console.log('Store ID:', store.id);
+      console.log('Verification data:', verificationData);
+      
       setIsSubmittingReview(true);
       setError(null);
       
+      // First, verify the transaction
+      console.log('Calling verifyReviewTransaction API...');
+      const verificationResult = await verifyReviewTransaction(store.id, verificationData);
+      console.log('Verification result:', verificationResult);
+      
+      if (!verificationResult || !verificationResult.status || verificationResult.status !== 'success') {
+        console.error('Verification failed:', verificationResult?.error || 'Unknown error');
+        throw new Error(verificationResult?.error || 'Verification failed');
+      }
+      
+      // Get the review data from the verification data
+      console.log('Preparing review data for submission...');
+      const reviewData: ReviewFormData = {
+        store_id: store.id,
+        rating: parseInt(verificationData.rating),
+        comment: verificationData.comment,
+        txid: verificationData.txid
+      };
+      console.log('Review data to submit:', reviewData);
+      
+      // Submit the review with the verification data
+      console.log('Submitting review to API...');
       const response = await fetch(`${API_URL}/api/reviews`, {
         method: 'POST',
         headers: {
@@ -59,16 +92,22 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
         body: JSON.stringify(reviewData),
       });
       
+      console.log('Review submission response status:', response.status);
+      
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Review submission error response:', errorText);
         throw new Error(`Failed to submit review: ${response.statusText}`);
       }
       
       const newReview = await response.json();
+      console.log('Review submitted successfully:', newReview);
       setReviews([...reviews, newReview]);
       setShowReviewForm(false);
     } catch (err) {
       console.error('Error submitting review:', err);
       setError('Failed to submit review. Please try again later.');
+      throw err; // Re-throw to let the ReviewForm handle the error
     } finally {
       setIsSubmittingReview(false);
     }
@@ -200,7 +239,9 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
                 <h4 className="text-md font-semibold mb-3">Write a Review</h4>
                 <ReviewForm
                   storeId={store.id}
+                  storeAddress={store.btc_address}
                   onSubmit={handleReviewSubmit}
+                  onVerify={handleReviewVerify}
                   isLoading={isSubmittingReview}
                 />
               </div>

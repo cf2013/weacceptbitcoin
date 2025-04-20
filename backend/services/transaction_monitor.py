@@ -1,10 +1,11 @@
 import aiohttp
 import asyncio
 import logging
-from typing import Optional, Dict, Any, Callable
+from typing import Optional, Dict, Any, Callable, List
 import os
 from dotenv import load_dotenv
 import random
+import time
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -90,13 +91,14 @@ class TransactionMonitor:
             'error': 'Transaction not sent from the expected address'
         }
 
-    async def verify_review_transaction(self, txid: str, store_address: str) -> Dict[str, Any]:
+    async def verify_review_transaction(self, txid: str, store_address: str, verification_amount: Optional[int] = None) -> Dict[str, Any]:
         """
         Verify that a transaction was sent to the store's Bitcoin address.
         Returns a dictionary with verification status and details.
         """
         print(f"Starting transaction verification for txid: {txid}")
         print(f"Expected store address: {store_address}")
+        print(f"Expected verification amount: {verification_amount}")
         
         tx_data = await self.get_transaction(txid)
         if not tx_data:
@@ -119,13 +121,28 @@ class TransactionMonitor:
         print("Transaction is confirmed, checking outputs...")
         
         # Check if any output is sent to the store's address with sufficient amount
+        # for testing purposes we can change if amount >= verification_amount.
         for vout in tx_data.get('vout', []):
             print(f"Checking output: {vout}")
             if vout.get('scriptpubkey_address') == store_address:
                 amount = vout.get('value', 0)
                 print(f"Found matching output to store address with amount: {amount} sats")
-                # For review verification, we just check if there's a payment to the store address
-                # The exact amount is not critical for reviews
+                
+                # If verification_amount is provided, check if the amount matches exactly
+                if verification_amount is not None:
+                    if amount >= verification_amount:
+                        return {
+                            'verified': True,
+                            'amount': amount,
+                            'txid': txid
+                        }
+                    else:
+                        return {
+                            'verified': False,
+                            'error': f'Transaction amount ({amount} sats) must be exactly {verification_amount} sats'
+                        }
+                
+                # If no verification_amount is provided, just check if there's a payment to the store address
                 return {
                     'verified': True,
                     'amount': amount,

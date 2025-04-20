@@ -47,6 +47,7 @@ export interface ReviewFormData {
   rating: number;
   comment: string;
   txid?: string;
+  verified?: boolean;
 }
 
 export interface VerificationFormData {
@@ -54,4 +55,5 @@ export interface VerificationFormData {
   txid: string;
   rating: string;
   comment: string;
+  verification_amount?: number;
 } 

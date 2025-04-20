@@ -14,7 +14,7 @@ class ReviewBase(BaseModel):
     txid: constr(min_length=64, max_length=64)  # Bitcoin transaction ID validation
 
 class ReviewCreate(ReviewBase):
-    pass
+    verified: bool = False
 
 class Review(BaseModel):  # Changed from ReviewBase to BaseModel
     id: str
@@ -28,6 +28,7 @@ class Review(BaseModel):  # Changed from ReviewBase to BaseModel
 
 class VerificationRequest(BaseModel):
     txid: constr(min_length=64, max_length=64)
+    verification_amount: Optional[int] = None
 
 @router.post("", response_model=Review)
 async def create_new_review(review: ReviewCreate):
@@ -41,8 +42,9 @@ async def create_new_review(review: ReviewCreate):
                 detail="Store not found"
             )
 
-        # Create review
-        response = create_review(review.dict())
+        # Create review with all fields including verified
+        review_data = review.dict()
+        response = create_review(review_data)
         if response.error:
             raise HTTPException(status_code=500, detail=response.error)
             
@@ -130,7 +132,8 @@ async def verify_review_transaction(store_id: str, verification: VerificationReq
         print(f"Calling transaction_monitor.verify_review_transaction with txid: {verification.txid}")
         verification_result = await transaction_monitor.verify_review_transaction(
             verification.txid, 
-            store["btc_address"]
+            store["btc_address"],
+            verification.verification_amount
         )
         print(f"Verification result: {verification_result}")
         

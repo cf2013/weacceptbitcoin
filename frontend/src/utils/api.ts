@@ -53,6 +53,33 @@ export const verifyReview = async (reviewId: string): Promise<ApiResponse<null>>
 };
 
 export const verifyReviewTransaction = async (storeId: string, verificationData: VerificationFormData): Promise<ApiResponse<{ txid: string }>> => {
-  const response = await api.post(`/reviews/verify?store_id=${storeId}`, verificationData);
-  return response.data;
+  // Validate txid length
+  if (!verificationData.txid || verificationData.txid.length !== 64) {
+    throw new Error('Transaction ID must be exactly 64 characters long');
+  }
+  
+  // Extract only the required fields for the verification request
+  const verificationRequest = {
+    txid: verificationData.txid,
+    verification_amount: verificationData.verification_amount ? parseInt(verificationData.verification_amount.toString()) : undefined
+  };
+  
+  console.log('Sending verification request:', {
+    url: `/reviews/verify?store_id=${storeId}`,
+    body: verificationRequest
+  });
+  
+  try {
+    // Send the request with store_id as a query parameter and verification as the request body
+    const response = await api.post(`/reviews/verify?store_id=${storeId}`, verificationRequest);
+    return response.data;
+  } catch (error: any) {
+    console.error('Error in verifyReviewTransaction:', error);
+    if (error.response) {
+      console.error('Error response data:', error.response.data);
+      console.error('Error response status:', error.response.status);
+      throw new Error(error.response.data?.detail || error.response.data?.message || error.message || 'Verification failed');
+    }
+    throw error;
+  }
 }; 

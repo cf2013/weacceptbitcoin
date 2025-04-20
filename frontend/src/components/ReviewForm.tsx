@@ -65,12 +65,18 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     setError('');
     
     try {
+      // Validate txid
+      if (!data.txid || data.txid.length !== 64) {
+        throw new Error('Transaction ID must be exactly 64 characters long');
+      }
+
       // Create verification data from the form data
       const verificationData: VerificationFormData = {
         store_id: data.store_id,
-        txid: data.txid || '',
+        txid: data.txid,
         rating: data.rating.toString(),
-        comment: data.comment
+        comment: data.comment,
+        verification_amount: verificationAmount
       };
       
       console.log('Verification form submitted with data:', verificationData);

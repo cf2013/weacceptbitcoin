@@ -64,6 +64,12 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
       
       // First, verify the transaction
       console.log('Calling verifyReviewTransaction API...');
+      console.log('Request URL:', `/reviews/verify?store_id=${store.id}`);
+      console.log('Request body:', {
+        txid: verificationData.txid,
+        verification_amount: verificationData.verification_amount ? parseInt(verificationData.verification_amount.toString()) : undefined
+      });
+      
       const verificationResult = await verifyReviewTransaction(store.id, verificationData);
       console.log('Verification result:', verificationResult);
       
@@ -78,7 +84,8 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
         store_id: store.id,
         rating: parseInt(verificationData.rating),
         comment: verificationData.comment,
-        txid: verificationData.txid
+        txid: verificationData.txid,
+        verified: true
       };
       console.log('Review data to submit:', reviewData);
       

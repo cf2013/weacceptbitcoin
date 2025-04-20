@@ -251,6 +251,23 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
                   onVerify={handleReviewVerify}
                   isLoading={isSubmittingReview}
                 />
+                <div className="mt-4">
+                  <div className="text-center text-gray-600 font-medium mb-2">OR</div>
+                  <div className="flex gap-4 justify-center">
+                    <button
+                      onClick={() => console.log('Sign with wallet clicked')}
+                      className="bg-bitcoin-orange hover:bg-bitcoin-orange/90 text-white font-bold py-2 px-6 rounded transition-colors text-sm"
+                    >
+                      Sign with Wallet
+                    </button>
+                    <button
+                      onClick={() => console.log('Sign with NOSTR clicked')}
+                      className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded transition-colors text-sm"
+                    >
+                      Sign with NOSTR
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
 

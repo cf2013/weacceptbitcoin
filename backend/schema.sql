@@ -23,6 +23,7 @@ create table if not exists reviews (
     rating integer not null check (rating >= 1 and rating <= 5),
     comment text,
     txid text not null,
+    verified boolean default false,
     created_at timestamp with time zone default timezone('utc'::text, now()),
     updated_at timestamp with time zone default timezone('utc'::text, now())
 );

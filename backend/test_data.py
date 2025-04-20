@@ -24,13 +24,15 @@ test_reviews = [
         "store_id": "",  # Will be filled after store creation
         "rating": 5,
         "comment": "Great coffee and smooth Bitcoin payment process!",
-        "txid": "81b4c832e6c4b7a7b5e0ad626f7f9d9778d3921195c6c476145c5e7e8d0aaa01"
+        "txid": "81b4c832e6c4b7a7b5e0ad626f7f9d9778d3921195c6c476145c5e7e8d0aaa01",
+        "verified": False
     },
     {
         "store_id": "",  # Will be filled after store creation
         "rating": 4,
         "comment": "Good selection of tech products and easy Bitcoin payment.",
-        "txid": "92c5d2c7e0b4a6b8f3d2e1c9a8b7d6e5f4c3b2a1908070605040302010000ff"
+        "txid": "92c5d2c7e0b4a6b8f3d2e1c9a8b7d6e5f4c3b2a1908070605040302010000ff",
+        "verified": False
     }
 ]
 

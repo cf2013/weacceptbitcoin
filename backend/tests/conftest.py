@@ -24,5 +24,6 @@ def test_review():
         "store_id": "test-store-id",
         "rating": 5,
         "comment": "Great test store!",
-        "txid": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6"
+        "txid": "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6",
+        "verified": False
     } 

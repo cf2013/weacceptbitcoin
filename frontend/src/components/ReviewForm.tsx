@@ -48,7 +48,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ storeId, onSubmit, isLoading = 
         </label>
         <textarea
           id="comment"
-          className="input"
+          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-bitcoin-orange focus:border-bitcoin-orange transition-colors"
           rows={4}
           {...register('comment')}
         />
@@ -61,7 +61,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({ storeId, onSubmit, isLoading = 
         <input
           id="txid"
           type="text"
-          className={`input ${errors.txid ? 'border-red-500' : ''}`}
+          className={`w-full px-4 py-2 border-2 rounded-lg focus:ring-2 focus:ring-bitcoin-orange focus:border-bitcoin-orange transition-colors ${
+            errors.txid ? 'border-red-500' : 'border-gray-300'
+          }`}
           {...register('txid', { required: 'Transaction ID is required' })}
         />
         {errors.txid && (

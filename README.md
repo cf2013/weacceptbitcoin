@@ -13,7 +13,10 @@ A directory of Bitcoin-accepting stores with verified reviews based on on-chain 
 
 - Verified customer reviews
     -Review and rate a verified store directly.
+        rate and write your review, send exact number of sats.
     -As people consume and pay in a verified store transactions are monitored for rating and comments.
+    -sign your review with LN.
+    -sign your review with Nostr.
 
 ## Tech Stack
 

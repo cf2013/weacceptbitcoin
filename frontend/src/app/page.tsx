@@ -2,13 +2,24 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { FaBitcoin } from 'react-icons/fa';
+import { FaBitcoin, FaSearch } from 'react-icons/fa';
 import StoreCard from '@/components/StoreCard';
 import RegisterModal from '@/components/RegisterModal';
 import { mockStores } from '@/data/mockData';
 
 export default function Home() {
   const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [stores] = useState(mockStores);
+
+  const filteredStores = stores.filter(store => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      store.name.toLowerCase().includes(searchLower) ||
+      (store.description?.toLowerCase().includes(searchLower) ?? false) ||
+      (store.category?.toLowerCase().includes(searchLower) ?? false)
+    );
+  });
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -67,13 +78,25 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Stores Section */}
+      {/* Stores Section */}
       <section className="py-16">
         <h2 className="text-3xl font-bold text-center mb-12">
-          Featured Stores
+          Browse stores
         </h2>
+        <div className="max-w-2xl mx-auto mb-12">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search stores by name, category, or description..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bitcoin-orange focus:border-transparent"
+            />
+            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          </div>
+        </div>
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {mockStores.map((store) => (
+          {filteredStores.map((store) => (
             <StoreCard key={store.id} store={store} />
           ))}
         </div>

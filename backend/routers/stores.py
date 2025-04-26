@@ -15,12 +15,8 @@ class StoreBase(BaseModel):
     website: Optional[str] = None
     btc_address: Optional[constr(min_length=26, max_length=100)] = None
 
-class StoreCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    category: Optional[str] = None
-    website: Optional[str] = None
-    btc_address: constr(min_length=26, max_length=100)  # Required for creation
+class StoreCreate(StoreBase):
+    pass
 
 class Store(StoreCreate):
     id: str
@@ -32,6 +28,8 @@ class Store(StoreCreate):
 
 class VerificationRequest(BaseModel):
     txid: str
+    btc_address: str
+    verification_amount: Optional[int] = None
 
 @router.get("", response_model=List[Store])
 async def list_stores():
@@ -97,11 +95,42 @@ async def get_store_by_id(store_id: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.post("/verify", response_model=dict)
+async def verify_store_transaction(verification: VerificationRequest):
+    """Verify a store transaction before creating the store."""
+    try:
+        if not verification.btc_address:
+            raise HTTPException(status_code=400, detail="Bitcoin address is required")
+            
+        # Verify the transaction
+        verification_result = verify_transaction(
+            txid=verification.txid,
+            expected_address=verification.btc_address,
+            min_amount=verification.verification_amount or transaction_monitor.get_verification_amount()
+        )
+        
+        if not verification_result['verified']:
+            raise HTTPException(
+                status_code=400,
+                detail=verification_result.get('error', 'Transaction verification failed')
+            )
+            
+        return {
+            "status": "success",
+            "message": "Transaction verified successfully",
+            "txid": verification.txid,
+            "amount": verification_result.get('amount')
+        }
+    except HTTPException as e:
+        raise e
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.post("", response_model=Store)
 async def create_new_store(store: StoreCreate):
     try:
         store_data = store.model_dump()
-        store_data["verified"] = False  # New stores are unverified by default
+        store_data["verified"] = True  # All new stores must be verified
         store_data["verification_amount"] = transaction_monitor.get_verification_amount()
         response = create_store(store_data)
         if not response:

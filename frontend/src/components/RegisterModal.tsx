@@ -12,7 +12,7 @@ interface RegisterModalProps {
 
 const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = React.useState<'register' | 'verify'>('register');
-  const [storeData, setStoreData] = React.useState<StoreFormData | null>(null);
+  const [storeFormData, setStoreFormData] = React.useState<StoreFormData | null>(null);
   const [verificationStatus, setVerificationStatus] = React.useState<'pending' | 'verified' | 'failed'>('pending');
   const [error, setError] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -21,7 +21,7 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
   useEffect(() => {
     if (isOpen) {
       setStep('register');
-      setStoreData(null);
+      setStoreFormData(null);
       setVerificationStatus('pending');
       setError('');
       setIsLoading(false);
@@ -29,53 +29,52 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   const handleStoreSubmit = async (data: StoreFormData) => {
-    setIsLoading(true);
-    setError('');
-    
-    try {
-      const response = await fetch('/api/stores', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      const responseData = await response.json();
-
-      if (!response.ok) {
-        throw new Error(responseData.error || responseData.detail || 'Failed to create store');
-      }
-
-      setStoreData(responseData);
-      setStep('verify');
-    } catch (err) {
-      console.error('Store creation error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred while creating the store');
-    } finally {
-      setIsLoading(false);
-    }
+    setStoreFormData(data);
+    setStep('verify');
   };
 
   const handleVerificationSubmit = async (data: VerificationFormData) => {
-    if (!storeData) return;
+    if (!storeFormData) return;
     
     setIsLoading(true);
     setError('');
     
     try {
-      const response = await fetch(`/api/stores/${storeData.id}/verify`, {
+      // First verify the transaction
+      const verifyResponse = await fetch(`/api/stores/verify`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify({
+          ...storeFormData,
+          txid: data.txid
+        }),
       });
 
-      const responseData = await response.json();
+      const verifyData = await verifyResponse.json();
 
-      if (!response.ok) {
-        throw new Error(responseData.error || responseData.detail || 'Verification failed');
+      if (!verifyResponse.ok) {
+        throw new Error(verifyData.error || verifyData.detail || 'Verification failed');
+      }
+
+      // If verification successful, create the store
+      const createResponse = await fetch('/api/stores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          ...storeFormData,
+          verified: true,
+          verification_txid: data.txid
+        }),
+      });
+
+      const createData = await createResponse.json();
+
+      if (!createResponse.ok) {
+        throw new Error(createData.error || createData.detail || 'Failed to create store');
       }
 
       setVerificationStatus('verified');
@@ -117,15 +116,15 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
                 />
               )}
 
-              {step === 'verify' && storeData && (
+              {step === 'verify' && storeFormData && (
                 <>
                   {verificationStatus === 'pending' && (
                     <VerificationForm
                       onSubmit={handleVerificationSubmit}
                       isLoading={isLoading}
                       type="store"
-                      address={storeData.btc_address}
-                      verificationAmount={storeData.verification_amount ?? 5000}
+                      address={storeFormData.btc_address}
+                      verificationAmount={storeFormData.verification_amount ?? 5000}
                     />
                   )}
 

@@ -1,17 +1,21 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List, Optional
 from pydantic import BaseModel, constr
 from services.transaction_monitor import TransactionMonitor
+from services.lnurl_auth import LnurlAuthService
 from supabase_client import get_reviews, create_review, get_store, update_review
+import os
 
 router = APIRouter()
 transaction_monitor = TransactionMonitor()
+lnurl_auth_service = LnurlAuthService(domain=os.getenv("DOMAIN", "localhost"))
 
 class ReviewBase(BaseModel):
     store_id: str
     rating: int
     comment: Optional[str] = None
     txid: constr(min_length=64, max_length=64)  # Bitcoin transaction ID validation
+    user_pubkey: Optional[str] = None  # Lightning Network public key
 
 class ReviewCreate(ReviewBase):
     verified: bool = False
@@ -25,10 +29,16 @@ class Review(BaseModel):  # Changed from ReviewBase to BaseModel
     created_at: str
     updated_at: str
     verified: bool = False
+    user_pubkey: Optional[str] = None
 
 class VerificationRequest(BaseModel):
     txid: constr(min_length=64, max_length=64)
     verification_amount: Optional[int] = None
+
+class LnurlAuthRequest(BaseModel):
+    k1: str
+    sig: str
+    pubkey: str
 
 @router.post("", response_model=Review)
 async def create_new_review(review: ReviewCreate):
@@ -205,4 +215,50 @@ async def verify_review(review_id: str):
             
         return {"status": "success", "message": "Review verified successfully"}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# LNURL-auth endpoints
+@router.get("/lnauth/challenge", response_model=dict)
+async def create_lnauth_challenge():
+    """Create a new LNURL-auth challenge for signing a review."""
+    try:
+        k1, lnurl, qr_code = lnurl_auth_service.generate_challenge()
+        return {
+            "k1": k1,
+            "lnurl": lnurl,
+            "qr_code": qr_code
+        }
+    except Exception as e:
+        print(f"Exception in create_lnauth_challenge: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/lnauth/verify", response_model=dict)
+async def verify_lnauth_signature(auth_request: LnurlAuthRequest):
+    """Verify a LNURL-auth signature."""
+    try:
+        is_valid = lnurl_auth_service.verify_signature(
+            auth_request.k1,
+            auth_request.sig,
+            auth_request.pubkey
+        )
+        
+        if not is_valid:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid signature"
+            )
+            
+        return {
+            "status": "success",
+            "message": "Signature verified successfully",
+            "pubkey": auth_request.pubkey
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Exception in verify_lnauth_signature: {str(e)}")
+        import traceback
+        print(traceback.format_exc())
         raise HTTPException(status_code=500, detail=str(e)) 

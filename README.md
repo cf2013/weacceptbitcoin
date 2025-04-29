@@ -6,6 +6,8 @@ A directory of Bitcoin-accepting stores with verified reviews based on on-chain 
 
 - Store onboarding using Bitcoin transaction
     -Verify a store by sending the exact small amount to store owner address.
+    -sign your review with LN.
+    -sign your review with Nostr.
 
 - Display verified stores in a store directory
     -Search box available to filter stores by different criteria

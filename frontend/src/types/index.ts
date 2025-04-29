@@ -20,6 +20,7 @@ export interface Review {
   txid: string;
   store_id: string;
   verified: boolean;
+  user_pubkey?: string;
 }
 
 export interface ApiResponse<T> {
@@ -49,6 +50,7 @@ export interface ReviewFormData {
   comment: string;
   txid?: string;
   verified?: boolean;
+  user_pubkey?: string;
 }
 
 export interface VerificationFormData {
@@ -57,4 +59,10 @@ export interface VerificationFormData {
   rating: string;
   comment: string;
   verification_amount?: number;
+}
+
+export interface LnurlAuthResponse {
+  k1: string;
+  lnurl: string;
+  qr_code: string;
 } 

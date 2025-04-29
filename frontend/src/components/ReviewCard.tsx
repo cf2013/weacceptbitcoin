@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaStar, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
+import { FaStar, FaCheckCircle, FaTimesCircle, FaBolt } from 'react-icons/fa';
 import { Review } from '@/types';
 
 interface ReviewCardProps {
@@ -49,8 +49,15 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
         <p className="mt-2 text-gray-700">{review.comment}</p>
       )}
 
-      <div className="mt-3 text-xs text-gray-500">
+      <div className="mt-3 text-xs text-gray-500 flex flex-wrap gap-2">
         <span className="font-mono">TXID: {review.txid.slice(0, 8)}...{review.txid.slice(-8)}</span>
+        
+        {review.user_pubkey && (
+          <span className="flex items-center text-blue-500" title="Signed with Lightning Network">
+            <FaBolt className="mr-1" />
+            <span className="font-mono">LN: {review.user_pubkey.slice(0, 8)}...{review.user_pubkey.slice(-8)}</span>
+          </span>
+        )}
       </div>
     </div>
   );

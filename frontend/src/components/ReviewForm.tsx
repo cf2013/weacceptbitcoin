@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { FaBitcoin, FaArrowRight, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { FaBitcoin, FaArrowRight, FaCheckCircle, FaExclamationTriangle, FaBolt } from 'react-icons/fa';
 import { ReviewFormData, VerificationFormData } from '@/types';
+import Image from 'next/image';
 
 interface ReviewFormProps {
   storeId: string;
@@ -18,12 +19,16 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   onVerify,
   isLoading = false 
 }) => {
-  const [step, setStep] = useState<'review' | 'verify'>('review');
+  const [step, setStep] = useState<'review' | 'verify' | 'lnauth'>('review');
   const [reviewData, setReviewData] = useState<ReviewFormData | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<'pending' | 'verified' | 'failed'>('pending');
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [verificationAmount, setVerificationAmount] = useState<number>(0);
+  const [lnurlData, setLnurlData] = useState<{k1: string, lnurl: string, qr_code: string} | null>(null);
+  const [savePubkey, setSavePubkey] = useState<boolean>(false);
+  const [userPubkey, setUserPubkey] = useState<string | null>(null);
+  const [lnReviewStatus, setLnReviewStatus] = useState<'idle' | 'success' | 'error'>('idle');
 
   // Generate a random verification amount between 1000 and 5000 sats
   useEffect(() => {
@@ -35,6 +40,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     handleSubmit,
     formState: { errors },
     reset,
+    setValue,
   } = useForm<ReviewFormData>({
     defaultValues: {
       store_id: storeId,
@@ -95,6 +101,85 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       console.error('Verification error:', err);
       setVerificationStatus('failed');
       setError(err instanceof Error ? err.message : 'An error occurred during verification');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLnauthSign = async () => {
+    setIsSubmitting(true);
+    setError('');
+    try {
+      // Request LNURL-auth challenge
+      const response = await fetch('/api/reviews/lnauth/challenge');
+      if (!response.ok) {
+        throw new Error('Failed to generate LNURL-auth challenge');
+      }
+      const data = await response.json();
+      setLnurlData(data);
+      setStep('lnauth');
+    } catch (err) {
+      console.error('LNURL-auth error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during LNURL-auth');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const submitReviewWithLN = async (pubkey: string) => {
+    if (!reviewData) return;
+    setIsSubmitting(true);
+    setError('');
+    setLnReviewStatus('idle');
+    try {
+      const reviewPayload: ReviewFormData = {
+        ...reviewData,
+        user_pubkey: savePubkey ? pubkey : undefined,
+      };
+      // Call the backend review creation endpoint
+      const response = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(reviewPayload),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to submit review with Lightning');
+      }
+      setLnReviewStatus('success');
+      setStep('review');
+      reset();
+      setReviewData(null);
+      setUserPubkey(null);
+    } catch (err) {
+      setLnReviewStatus('error');
+      setError(err instanceof Error ? err.message : 'An error occurred while submitting your review with Lightning');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLnauthVerify = async (k1: string, sig: string, pubkey: string) => {
+    setIsSubmitting(true);
+    setError('');
+    try {
+      // Verify LNURL-auth signature
+      const response = await fetch('/api/reviews/lnauth/verify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ k1, sig, pubkey }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to verify LNURL-auth signature');
+      }
+      const data = await response.json();
+      setUserPubkey(data.pubkey);
+      // Immediately submit the review with pubkey if opted in
+      await submitReviewWithLN(data.pubkey);
+    } catch (err) {
+      setLnReviewStatus('error');
+      setError(err instanceof Error ? err.message : 'An error occurred during LNURL-auth verification');
     } finally {
       setIsSubmitting(false);
     }
@@ -165,6 +250,31 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             )}
           </div>
 
+          <div className="flex items-center mb-2">
+            <input
+              type="checkbox"
+              id="savePubkey"
+              className="mr-2"
+              checked={savePubkey}
+              onChange={(e) => setSavePubkey(e.target.checked)}
+            />
+            <label htmlFor="savePubkey" className="text-sm text-gray-700">
+              Save my pubkey with this review (optional)
+            </label>
+          </div>
+
+          <div className="flex flex-col items-center space-y-2">
+            <button
+              type="button"
+              className="btn btn-secondary flex items-center justify-center w-full"
+              onClick={handleLnauthSign}
+              disabled={isSubmitting}
+            >
+              <FaBolt className="mr-2" />
+              Sign with Wallet
+            </button>
+          </div>
+
           <div className="pt-4">
             <button
               type="submit"
@@ -175,6 +285,52 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             </button>
           </div>
         </form>
+      )}
+
+      {step === 'lnauth' && lnurlData && (
+        <div className="card bg-white p-6 rounded-lg shadow-sm">
+          <div className="flex items-center justify-center mb-6">
+            <FaBolt className="text-yellow-500 text-2xl mr-2" />
+            <h3 className="text-xl font-bold">Sign with Lightning Network</h3>
+          </div>
+
+          <div className="mb-6 text-center">
+            <p className="text-sm text-gray-700 mb-2">
+              Scan this QR code with your Lightning wallet to sign your review.
+            </p>
+            <p className="text-xs text-gray-500 mb-4">
+              This only proves you control your Lightning identity. {savePubkey ? 'Your pubkey will be saved with your review.' : 'Your pubkey will NOT be saved unless you check the box.'}
+            </p>
+            <div className="flex justify-center mb-4">
+              <img 
+                src={`data:image/png;base64,${lnurlData.qr_code}`} 
+                alt="LNURL QR Code" 
+                className="w-64 h-64"
+              />
+            </div>
+            <p className="text-sm text-gray-600">
+              Or click this link to open in your wallet:
+            </p>
+            <a 
+              href={lnurlData.lnurl} 
+              className="text-sm text-blue-500 hover:underline break-all"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {lnurlData.lnurl}
+            </a>
+          </div>
+
+          <div className="pt-2">
+            <button
+              type="button"
+              className="w-full bg-gray-200 hover:bg-gray-300 text-gray-800 py-2 px-4 rounded-md transition-colors"
+              onClick={() => setStep('review')}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
       )}
 
       {step === 'verify' && reviewData && (
@@ -195,7 +351,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 </div>
               </div>
 
-              <form onSubmit={handleSubmit(handleVerificationSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit((data) => {
+                if (userPubkey && savePubkey) {
+                  data.user_pubkey = userPubkey;
+                }
+                handleVerificationSubmit(data);
+              })} className="space-y-4">
                 <div>
                   <label htmlFor="txid" className="block text-sm font-medium text-gray-700 mb-1">
                     Bitcoin Transaction ID (TXID)
@@ -237,12 +398,12 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                     <p className="text-green-600 mb-4">Your review is now verified and visible on the store page!</p>
                     <button 
                       onClick={() => {
-                        // Reset form and go back to review step
                         reset();
                         setStep('review');
                         setReviewData(null);
                         setVerificationStatus('pending');
                         setError('');
+                        setUserPubkey(null);
                       }}
                       className="bg-bitcoin-orange hover:bg-bitcoin-orange-dark text-white py-2 px-4 rounded-md transition-colors"
                     >
@@ -269,7 +430,17 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         </>
       )}
 
-      {/* Only show error in the review step */}
+      {lnReviewStatus === 'success' && (
+        <div className="p-4 bg-green-100 text-green-800 rounded">
+          Your review has been submitted with your Lightning identity!
+        </div>
+      )}
+      {lnReviewStatus === 'error' && (
+        <div className="p-4 bg-red-100 text-red-800 rounded">
+          {error}
+        </div>
+      )}
+
       {error && step === 'review' && (
         <div className="mt-4 p-4 bg-red-50 text-red-500 rounded-md">
           {error}

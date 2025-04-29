@@ -24,6 +24,7 @@ create table if not exists reviews (
     comment text,
     txid text not null,
     verified boolean default false,
+    user_pubkey text,
     created_at timestamp with time zone default timezone('utc'::text, now()),
     updated_at timestamp with time zone default timezone('utc'::text, now())
 );
@@ -64,4 +65,5 @@ create policy "Reviews are viewable by everyone"
 -- Create indexes
 create index if not exists stores_btc_address_idx on stores(btc_address);
 create index if not exists reviews_store_id_idx on reviews(store_id);
-create index if not exists reviews_txid_idx on reviews(txid); 
+create index if not exists reviews_txid_idx on reviews(txid);
+create index if not exists reviews_user_pubkey_idx on reviews(user_pubkey); 

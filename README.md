@@ -22,10 +22,12 @@ A directory of Bitcoin-accepting stores with verified reviews based on on-chain 
 
 ## Tech Stack
 
-- Frontend: Next.js + React
+- Frontend: Next.js + React + TypeScript + Tailwind CSS
 - Backend: Python + FastAPI
-- Database: PostgreSQL
+- Database: Supabase (PostgreSQL)
+- Authentication: LNURL-auth (Lightning Network authentication)
 - Blockchain Access: Mempool.space API
+- Additional Tools: QR Code generation, LNURL support
 
 ## Project Structure
 
@@ -43,7 +45,7 @@ weacceptbitcoin/
 
 - Node.js 18+
 - Python 3.9+
-- PostgreSQL
+- Supabase account
 - Bitcoin Core (optional, for local development)
 
 ### Backend Setup
@@ -60,15 +62,36 @@ source venv/bin/activate  # On Windows: .\venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-3. Set up environment variables:
+3. Set up Supabase:
+   - Create a new project in Supabase
+   - Run the schema.sql and supabase_setup.sql scripts
+   - Copy the Supabase URL and anon key
+
+4. Set up environment variables:
 ```bash
 cp .env.example .env
-# Edit .env with your configuration
+# Edit .env with your configuration:
+# - DATABASE_URL
+# - MEMPOOL_API_URL
+# - DOMAIN
+# - SECRET_KEY
+# - CORS_ORIGINS
+# - SUPABASE_URL
+# - SUPABASE_KEY
+# - SUPABASE_SERVICE_ROLE_KEY
+# - API_HOST
+# - API_PORT
+# - BITCOIN_NETWORK
 ```
 
-4. Run the development server:
+5. Run the development server:
 ```bash
 uvicorn main:app --reload
+```
+
+6. Run tests:
+```bash
+pytest
 ```
 
 ### Frontend Setup
@@ -82,12 +105,20 @@ npm install
 2. Set up environment variables:
 ```bash
 cp .env.example .env.local
-# Edit .env.local with your configuration
+# Edit .env.local with your configuration:
+# - NEXT_PUBLIC_BACKEND_URL
+# - NEXT_PUBLIC_SUPABASE_URL
+# - NEXT_PUBLIC_SUPABASE_ANON_KEY
 ```
 
 3. Run the development server:
 ```bash
 npm run dev
+```
+
+4. Run linting:
+```bash
+npm run lint
 ```
 
 ## License

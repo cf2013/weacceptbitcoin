@@ -8,6 +8,7 @@ import os
 
 router = APIRouter()
 transaction_monitor = TransactionMonitor()
+# Use the singleton instance
 lnurl_auth_service = LnurlAuthService(domain=os.getenv("DOMAIN", "localhost"))
 
 class ReviewBase(BaseModel):

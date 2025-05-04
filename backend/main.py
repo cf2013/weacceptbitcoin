@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
-from routers import stores, reviews, test, auth
+from routers import stores, reviews, auth
 
 # Load environment variables
 load_dotenv()
@@ -31,8 +31,7 @@ async def root():
 # Include routers
 app.include_router(stores.router, prefix="/api/stores", tags=["stores"])
 app.include_router(reviews.router, prefix="/api/reviews", tags=["reviews"])
-app.include_router(test.router, prefix="/api/test", tags=["test"])
-app.include_router(auth.router, prefix="/api")
+app.include_router(auth.router, prefix="", tags=["auth"])
 
 if __name__ == "__main__":
     import uvicorn

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, status, Depends
 from typing import List, Optional
-from pydantic import BaseModel, constr
+from pydantic import BaseModel, constr, validator
 from services.transaction_monitor import TransactionMonitor
 from services.lnurl_auth import LnurlAuthService
 from supabase_client import get_reviews, create_review, get_store, update_review
@@ -15,18 +15,24 @@ class ReviewBase(BaseModel):
     store_id: str
     rating: int
     comment: Optional[str] = None
-    txid: constr(min_length=64, max_length=64)  # Bitcoin transaction ID validation
+    txid: Optional[str] = None  # Remove constr, allow null
     user_pubkey: Optional[str] = None  # Lightning Network public key
+
+    @validator('txid')
+    def txid_length(cls, v):
+        if v is not None and len(v) != 64:
+            raise ValueError('txid must be exactly 64 characters long')
+        return v
 
 class ReviewCreate(ReviewBase):
     verified: bool = False
 
-class Review(BaseModel):  # Changed from ReviewBase to BaseModel
+class Review(BaseModel):
     id: str
     store_id: str
     rating: int
     comment: Optional[str] = None
-    txid: str  # Removed length validation for existing reviews
+    txid: Optional[str] = None  # Allow null/None for LNAuth reviews
     created_at: str
     updated_at: str
     verified: bool = False
@@ -51,6 +57,13 @@ async def create_new_review(review: ReviewCreate):
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Store not found"
+            )
+
+        # Require at least one of txid or user_pubkey
+        if not review.txid and not review.user_pubkey:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail="Either txid or user_pubkey is required."
             )
 
         # Create review with all fields including verified

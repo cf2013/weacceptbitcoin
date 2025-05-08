@@ -48,7 +48,7 @@ export interface ReviewFormData {
   store_id: string;
   rating: number;
   comment: string;
-  txid?: string;
+  txid?: string | null;
   verified?: boolean;
   user_pubkey?: string;
 }

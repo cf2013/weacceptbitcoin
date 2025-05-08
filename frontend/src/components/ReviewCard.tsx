@@ -50,7 +50,9 @@ const ReviewCard: React.FC<ReviewCardProps> = ({ review }) => {
       )}
 
       <div className="mt-3 text-xs text-gray-500 flex flex-wrap gap-2">
-        <span className="font-mono">TXID: {review.txid.slice(0, 8)}...{review.txid.slice(-8)}</span>
+        <span className="font-mono">
+          TXID: {review.txid ? `${review.txid.slice(0, 8)}...${review.txid.slice(-8)}` : 'Lightning Auth'}
+        </span>
         
         {review.user_pubkey && (
           <span className="flex items-center text-blue-500" title="Signed with Lightning Network">

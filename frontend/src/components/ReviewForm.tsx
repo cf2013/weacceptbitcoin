@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaBitcoin, FaArrowRight, FaCheckCircle, FaExclamationTriangle, FaBolt } from 'react-icons/fa';
 import { ReviewFormData, VerificationFormData } from '@/types';
@@ -22,7 +22,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   onClose
 }) => {
   const [step, setStep] = useState<'review' | 'verify' | 'lnauth'>('review');
-  const [reviewData, setReviewData] = useState<ReviewFormData | null>(null);
+  const reviewDataRef = useRef<ReviewFormData | null>(null);
   const [verificationStatus, setVerificationStatus] = useState<'pending' | 'verified' | 'failed'>('pending');
   const [error, setError] = useState<string>('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -47,6 +47,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     };
   }, [pollingInterval]);
 
+  useEffect(() => {
+    console.log('reviewData changed:', reviewDataRef.current);
+  }, [reviewDataRef.current]);
+
   const {
     register,
     handleSubmit,
@@ -66,7 +70,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
     
     try {
       console.log('Review form submitted with data:', data);
-      setReviewData(data);
+      reviewDataRef.current = data;
       setStep('verify');
     } catch (err) {
       console.error('Review submission error:', err);
@@ -77,7 +81,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   };
 
   const handleVerificationSubmit = async (data: ReviewFormData) => {
-    if (!reviewData) return;
+    if (!reviewDataRef.current) return;
     setIsSubmitting(true);
     setError('');
     try {
@@ -95,14 +99,14 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       };
       console.log('Verification form submitted with data:', verificationData);
       console.log('Store address for verification:', storeAddress);
-      console.log('Review data to be submitted after verification:', reviewData);
+      console.log('Review data to be submitted after verification:', reviewDataRef.current);
       await onVerify(verificationData);
       console.log('Verification successful, updating status to verified');
       setVerificationStatus('verified');
       // Reset form after successful verification
       reset();
       setStep('review');
-      setReviewData(null);
+      reviewDataRef.current = null;
       onClose({ type: 'success', message: 'Your review has been verified and submitted successfully!' });
     } catch (err) {
       console.error('Verification error:', err);
@@ -132,12 +136,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         setLnReviewStatus('success');
         setUserPubkey(data.pubkey);
         // Submit the review with pubkey if opted in
-        if (reviewData) {
+        if (reviewDataRef.current) {
           const reviewPayload: ReviewFormData = {
-            ...reviewData,
+            ...reviewDataRef.current,
             user_pubkey: savePubkey ? data.pubkey : undefined,
+            txid: null,
           };
-          // Call the backend review creation endpoint
+          console.log('Submitting review via LNAuth:', reviewPayload);
           const reviewResponse = await fetch('/api/reviews', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -145,19 +150,22 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
           });
           if (!reviewResponse.ok) {
             const errorData = await reviewResponse.json();
-            throw new Error(errorData.detail || 'Failed to submit review with Lightning');
+            console.error('Error submitting review via LNAuth:', errorData);
+            throw new Error(JSON.stringify(errorData.detail) || 'Failed to submit review with Lightning');
           }
+        } else {
+          console.error('No reviewData found when LNAuth completed!');
         }
         // Reset form after successful submission
         reset();
-        setReviewData(null);
+        reviewDataRef.current = null;
         setStep('review');
         onClose({ type: 'success', message: 'Successfully signed with Lightning Network!' });
       }
     } catch (err) {
       console.error('Error checking verification status:', err);
       setLnReviewStatus('error');
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred during verification';
+      const errorMessage = err instanceof Error ? err.message : JSON.stringify(err);
       setError(errorMessage);
       // Stop polling on error
       if (pollingInterval) {
@@ -221,10 +229,11 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       setLnReviewStatus('success');
       
       // Submit the review with pubkey if opted in
-      if (reviewData) {
+      if (reviewDataRef.current) {
         const reviewPayload: ReviewFormData = {
-          ...reviewData,
+          ...reviewDataRef.current,
           user_pubkey: savePubkey ? data.pubkey : undefined,
+          txid: null,
         };
         
         // Call the backend review creation endpoint
@@ -245,7 +254,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       
       // Reset form after successful submission
       reset();
-      setReviewData(null);
+      reviewDataRef.current = null;
       setStep('review');
     } catch (err) {
       setLnReviewStatus('error');
@@ -339,7 +348,13 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             <button
               type="button"
               className="btn btn-secondary flex items-center justify-center w-full"
-              onClick={handleLnauthSign}
+              onClick={async () => {
+                // Validate the form before starting LNAuth
+                await handleSubmit((data) => {
+                  reviewDataRef.current = data; // Save the review data
+                  handleLnauthSign();  // Start LNAuth
+                })();
+              }}
               disabled={isSubmitting}
             >
               <FaBolt className="mr-2" />
@@ -434,7 +449,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         </div>
       )}
 
-      {step === 'verify' && reviewData && (
+      {step === 'verify' && reviewDataRef.current && (
         <>
           {verificationStatus === 'pending' && (
             <div className="card bg-white p-6 rounded-lg shadow-sm">
@@ -501,7 +516,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                       onClick={() => {
                         reset();
                         setStep('review');
-                        setReviewData(null);
+                        reviewDataRef.current = null;
                         setVerificationStatus('pending');
                         setError('');
                         setUserPubkey(null);

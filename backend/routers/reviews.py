@@ -248,13 +248,21 @@ async def verify_lnauth_signature(auth_request: LnurlAuthRequest):
         if not is_valid:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid signature"
+                detail="Invalid LNURL-auth signature"
+            )
+            
+        # Get the pubkey from the verified challenge
+        pubkey = lnurl_auth_service.get_pubkey_from_challenge(auth_request.k1)
+        if not pubkey:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Could not retrieve pubkey from verified challenge"
             )
             
         return {
             "status": "success",
-            "message": "Signature verified successfully",
-            "pubkey": auth_request.pubkey
+            "message": "LNURL-auth signature verified successfully",
+            "pubkey": pubkey
         }
     except HTTPException:
         raise

@@ -185,4 +185,25 @@ class LnurlAuthService:
         """
         if k1 in self.challenges and self.challenges[k1]["verified"]:
             return self.challenges[k1].get("pubkey")
-        return None 
+        return None
+
+    def get_challenge_data(self, k1: str) -> Optional[Dict]:
+        """
+        Get the data for a challenge.
+        
+        Args:
+            k1: The challenge string
+            
+        Returns:
+            The challenge data if it exists and hasn't expired, None otherwise
+        """
+        if k1 not in self.challenges:
+            return None
+            
+        challenge_data = self.challenges[k1]
+        if time.time() > challenge_data["expires_at"]:
+            # Remove expired challenge
+            del self.challenges[k1]
+            return None
+            
+        return challenge_data 

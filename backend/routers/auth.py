@@ -21,6 +21,22 @@ async def lnurl_auth_callback(
         return {"status": "ERROR", "reason": "Invalid signature"}
     return {"status": "OK"}
 
+@router.get("/api/auth/lnurl/status")
+async def lnurl_auth_status(k1: str = Query(...)):
+    """Check the status of a LNURL-auth challenge."""
+    # Get the challenge data
+    challenge_data = lnurl_auth_service.get_challenge_data(k1)
+    if not challenge_data:
+        return {"status": "ERROR", "reason": "Challenge not found or expired"}
+    
+    if not challenge_data.get("verified"):
+        return {"status": "PENDING"}
+    
+    return {
+        "status": "OK",
+        "pubkey": challenge_data.get("pubkey")
+    }
+
 @router.get("/api/auth/test-signature")
 async def test_signature(
     k1: Optional[str] = None,

@@ -129,7 +129,7 @@ async def verify_store_transaction(verification: VerificationRequest):
 @router.post("", response_model=Store)
 async def create_new_store(store: StoreCreate):
     try:
-        store_data = store.model_dump()
+        store_data = store.dict()
         store_data["verified"] = True  # All new stores must be verified
         store_data["verification_amount"] = transaction_monitor.get_verification_amount()
         response = create_store(store_data)

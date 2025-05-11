@@ -72,10 +72,11 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
     }
   };
 
-  const handleReviewSubmit = async (reviewData: ReviewFormData) => {
-    // This function is now just a placeholder as the actual submission
-    // will happen after verification
-    console.log('Review data submitted:', reviewData);
+  const handleReviewSubmit = async (reviewData: ReviewFormData | Review) => {
+    // Update the reviews state with the new review
+    if (reviewData && 'id' in reviewData) {
+      setReviews([...reviews, reviewData as Review]);
+    }
   };
 
   const handleReviewVerify = async (verificationData: VerificationFormData) => {

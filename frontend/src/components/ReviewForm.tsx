@@ -153,6 +153,10 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             console.error('Error submitting review via LNAuth:', errorData);
             throw new Error(JSON.stringify(errorData.detail) || 'Failed to submit review with Lightning');
           }
+          // Get the newly created review data
+          const newReview = await reviewResponse.json();
+          // Call onSubmit with the new review data to update parent component
+          onSubmit(newReview);
         } else {
           console.error('No reviewData found when LNAuth completed!');
         }

@@ -4,6 +4,7 @@ import { Store, Review, ReviewFormData, VerificationFormData } from '@/types';
 import ReviewCard from './ReviewCard';
 import ReviewForm from './ReviewForm';
 import { verifyReviewTransaction } from '@/utils/api';
+import Image from 'next/image';
 
 interface StoreDetailsModalProps {
   store: Store;
@@ -149,9 +150,36 @@ const StoreDetailsModal: React.FC<StoreDetailsModalProps> = ({ store, isOpen, on
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+        {/* Banner Image */}
+        {store.banner_image_url && (
+          <div className="relative w-full h-48 mb-4">
+            <Image
+              src={store.banner_image_url}
+              alt={`${store.name} banner`}
+              fill
+              className="object-cover rounded-t-lg"
+            />
+          </div>
+        )}
+
         {/* Header */}
         <div className="sticky top-0 bg-white border-b p-4 flex justify-between items-center">
-          <h2 className="text-2xl font-bold">{store.name}</h2>
+          <div className="flex items-center space-x-4">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex-shrink-0 -mt-8 border-4 border-white">
+              {store.profile_image_url ? (
+                <Image
+                  src={store.profile_image_url}
+                  alt={`${store.name} profile`}
+                  width={64}
+                  height={64}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <FaBitcoin className="w-12 h-12 text-orange-500" />
+              )}
+            </div>
+            <h2 className="text-2xl font-bold">{store.name}</h2>
+          </div>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"

@@ -12,7 +12,8 @@ interface RegisterModalProps {
 
 const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
   const [step, setStep] = React.useState<'register' | 'verify'>('register');
-  const [storeFormData, setStoreFormData] = React.useState<StoreFormData | null>(null);
+  const [storeFormData, setStoreFormData] = React.useState<FormData | null>(null);
+  const [verificationSats, setVerificationSats] = React.useState<number>(0);
   const [verificationStatus, setVerificationStatus] = React.useState<'pending' | 'verified' | 'failed'>('pending');
   const [error, setError] = React.useState<string>('');
   const [isLoading, setIsLoading] = React.useState(false);
@@ -22,14 +23,16 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
     if (isOpen) {
       setStep('register');
       setStoreFormData(null);
+      setVerificationSats(0);
       setVerificationStatus('pending');
       setError('');
       setIsLoading(false);
     }
   }, [isOpen]);
 
-  const handleStoreSubmit = async (data: StoreFormData) => {
+  const handleStoreSubmit = async (data: FormData, sats: number) => {
     setStoreFormData(data);
+    setVerificationSats(sats);
     setStep('verify');
   };
 
@@ -47,8 +50,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...storeFormData,
-          txid: data.txid
+          txid: data.txid,
+          btc_address: storeFormData.get('btc_address'),
         }),
       });
 
@@ -58,17 +61,14 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
         throw new Error(verifyData.error || verifyData.detail || 'Verification failed');
       }
 
+      // Add verification data to the form
+      storeFormData.append('verification_txid', data.txid);
+      storeFormData.append('verification_amount', verificationSats.toString());
+
       // If verification successful, create the store
       const createResponse = await fetch('/api/stores', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...storeFormData,
-          verified: true,
-          verification_txid: data.txid
-        }),
+        body: storeFormData, // Send FormData directly
       });
 
       const createData = await createResponse.json();
@@ -123,8 +123,8 @@ const RegisterModal: React.FC<RegisterModalProps> = ({ isOpen, onClose }) => {
                       onSubmit={handleVerificationSubmit}
                       isLoading={isLoading}
                       type="store"
-                      address={storeFormData.btc_address}
-                      verificationAmount={storeFormData.verification_amount ?? 5000}
+                      address={storeFormData.get('btc_address')?.toString()}
+                      verificationAmount={verificationSats}
                     />
                   )}
 

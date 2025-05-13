@@ -3,7 +3,13 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['mempool.space'],
+    domains: [
+      'mempool.space',
+      'localhost',
+      'supabase.co',
+      'supabase.in',
+      'wxmksfojkiwlaiylqwht.supabase.co'  // Add your Supabase project domain
+    ],
   },
   env: {
     API_URL: process.env.API_URL || 'http://localhost:8000/api',

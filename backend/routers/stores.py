@@ -1,9 +1,10 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, constr, UUID4
 from typing import Optional, List
 from supabase_client import get_store, get_stores, create_store, update_store, get_reviews
 from services.bitcoin import verify_transaction
 from services.transaction_monitor import TransactionMonitor
+from services.image_upload import upload_image, delete_image
 
 router = APIRouter()
 transaction_monitor = TransactionMonitor()
@@ -14,6 +15,8 @@ class StoreBase(BaseModel):
     category: Optional[str] = None
     website: Optional[str] = None
     btc_address: Optional[constr(min_length=26, max_length=100)] = None
+    banner_image_url: Optional[str] = None
+    profile_image_url: Optional[str] = None
 
 class StoreCreate(StoreBase):
     pass
@@ -127,17 +130,67 @@ async def verify_store_transaction(verification: VerificationRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.post("", response_model=Store)
-async def create_new_store(store: StoreCreate):
+async def create_store_endpoint(
+    name: str = Form(...),
+    description: Optional[str] = Form(None),
+    category: Optional[str] = Form(None),
+    website: Optional[str] = Form(None),
+    btc_address: str = Form(...),
+    banner_image: Optional[UploadFile] = File(None),
+    profile_image: Optional[UploadFile] = File(None),
+    verification_txid: Optional[str] = Form(None),
+    verification_amount: Optional[int] = Form(None)
+):
     try:
-        store_data = store.dict()
-        store_data["verified"] = True  # All new stores must be verified
-        store_data["verification_amount"] = transaction_monitor.get_verification_amount()
-        response = create_store(store_data)
-        if not response:
-            raise HTTPException(status_code=500, detail="Failed to create store")
-        return response
+        # Create the store first
+        store_data = {
+            "name": name,
+            "description": description,
+            "category": category,
+            "website": website,
+            "btc_address": btc_address,
+            "verified": False,  # Default to False
+            "verification_txid": verification_txid,
+            "verification_amount": verification_amount
+        }
+        
+        store = create_store(store_data)
+        if not store:
+            raise HTTPException(status_code=400, detail="Failed to create store")
+            
+        # Upload images if provided
+        if banner_image:
+            banner_data = await banner_image.read()
+            banner_url = upload_image(
+                banner_data,
+                banner_image.filename,
+                store["id"],
+                "banner"
+            )
+            if banner_url:
+                store = update_store(store["id"], {"banner_image_url": banner_url})
+                
+        if profile_image:
+            profile_data = await profile_image.read()
+            profile_url = upload_image(
+                profile_data,
+                profile_image.filename,
+                store["id"],
+                "profile"
+            )
+            if profile_url:
+                store = update_store(store["id"], {"profile_image_url": profile_url})
+                
+        return store
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        # If store creation fails, clean up any uploaded images
+        if store and "id" in store:
+            if store.get("banner_image_url"):
+                delete_image(store["banner_image_url"])
+            if store.get("profile_image_url"):
+                delete_image(store["profile_image_url"])
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.patch("/{store_id}", response_model=Store)
 async def update_store_by_id(store_id: str, store: StoreBase):

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { FaBitcoin, FaStar, FaCheckCircle, FaTimesCircle } from 'react-icons/fa';
 import { Store } from '@/types';
 import StoreDetailsModal from './StoreDetailsModal';
+import Image from 'next/image';
 
 interface StoreCardProps {
   store: Store;
@@ -19,13 +20,28 @@ const StoreCard: React.FC<StoreCardProps> = ({ store }) => {
     <>
       <div className="card hover:shadow-lg transition-shadow">
         <div className="flex justify-between items-start">
-          <div>
-            <h3 className="text-xl font-bold">{store.name}</h3>
-            {store.category && (
-              <span className="inline-block bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full mt-1">
-                {store.category}
-              </span>
-            )}
+          <div className="flex items-center space-x-4">
+            <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gray-100 flex-shrink-0">
+              {store.profile_image_url ? (
+                <Image
+                  src={store.profile_image_url}
+                  alt={`${store.name} profile`}
+                  width={48}
+                  height={48}
+                  className="rounded-full object-cover"
+                />
+              ) : (
+                <FaBitcoin className="w-8 h-8 text-orange-500" />
+              )}
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">{store.name}</h3>
+              {store.category && (
+                <span className="inline-block bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded-full mt-1">
+                  {store.category}
+                </span>
+              )}
+            </div>
           </div>
           <div className="flex items-center">
             {store.verified ? (

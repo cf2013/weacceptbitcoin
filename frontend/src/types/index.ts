@@ -3,12 +3,16 @@ export interface Store {
   name: string;
   description: string;
   category: string;
+  website: string;
   btc_address: string;
   verified: boolean;
-  reviews: Review[];
+  verification_txid: string;
+  verification_amount: number;
+  banner_image_url?: string;
+  profile_image_url?: string;
   created_at: string;
   updated_at: string;
-  website?: string;
+  reviews: Review[];
 }
 
 export interface Review {
@@ -33,15 +37,17 @@ export interface ApiResponse<T> {
 export interface StoreFormData {
   id?: string;
   name: string;
-  description?: string;
-  category?: string;
-  website?: string;
+  description: string;
+  category: string;
+  website: string;
   btc_address: string;
   verified?: boolean;
   verification_txid?: string;
   verification_amount?: number;
   created_at?: string;
   updated_at?: string;
+  banner_image?: File;
+  profile_image?: File;
 }
 
 export interface ReviewFormData {

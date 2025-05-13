@@ -12,6 +12,8 @@ create table if not exists stores (
     verified boolean default false,
     verification_txid text,
     verification_amount bigint,
+    banner_image_url text,
+    profile_image_url text,
     created_at timestamp with time zone default timezone('utc'::text, now()),
     updated_at timestamp with time zone default timezone('utc'::text, now())
 );

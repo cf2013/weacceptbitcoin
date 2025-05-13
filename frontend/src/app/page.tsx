@@ -78,35 +78,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Stores Section */}
-      <section className="py-16">
-        <h2 className="text-3xl font-bold text-center mb-12">
-          Browse stores
-        </h2>
-        <div className="max-w-2xl mx-auto mb-12">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search stores by name, category, or description..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-4 py-3 pl-12 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-bitcoin-orange focus:border-transparent"
-            />
-            <FaSearch className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
-          </div>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredStores.map((store) => (
-            <StoreCard key={store.id} store={store} />
-          ))}
-        </div>
-        <div className="text-center mt-8">
-          <Link href="/stores" className="btn btn-primary">
-            View All Stores
-          </Link>
-        </div>
-      </section>
-
       {/* Register Modal */}
       <RegisterModal
         isOpen={isRegisterModalOpen}

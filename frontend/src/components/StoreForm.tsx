@@ -103,7 +103,6 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
             <h3 className="font-semibold text-blue-800 mb-2">How to Register Your Store</h3>
             <ol className="list-decimal list-inside space-y-2 text-blue-700">
               <li>Fill out your store details below</li>
-              <li>Upload your store's banner and profile images</li>
               <li>Add your Bitcoin address for receiving payments</li>
               <li>Send a small verification amount (1-10 USD in sats) to your own address</li>
               <li>Submit the transaction ID to verify ownership</li>
@@ -142,8 +141,8 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Profile Image
           </label>
-          <div className="mt-1 flex items-center">
-            <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100">
+          <div className="mt-1 flex flex-col items-center">
+            <div className="relative w-32 h-32 rounded-full overflow-hidden bg-gray-100 border border-gray-300 shadow-sm">
               {profilePreview ? (
                 <img
                   src={profilePreview}
@@ -165,7 +164,7 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
             />
             <label
               htmlFor="profile_image"
-              className="ml-4 px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+              className="mt-2 w-40 text-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
             >
               Choose Image
             </label>
@@ -177,8 +176,8 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Banner Image
           </label>
-          <div className="mt-1">
-            <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gray-100">
+          <div className="mt-1 flex flex-col items-center">
+            <div className="relative w-full h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300 shadow-sm">
               {bannerPreview ? (
                 <img
                   src={bannerPreview}
@@ -200,7 +199,7 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
             />
             <label
               htmlFor="banner_image"
-              className="mt-2 inline-block px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+              className="mt-2 w-40 text-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
             >
               Choose Banner
             </label>

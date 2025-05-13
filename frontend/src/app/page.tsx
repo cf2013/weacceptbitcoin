@@ -36,12 +36,12 @@ export default function Home() {
           Leave verified reviews based on your actual Bitcoin transactions.
         </p>
         <div className="flex gap-4 justify-center">
-          <Link href="/stores" className="btn btn-primary">
+          <Link href="/stores" className="btn btn-primary text-lg px-8 py-3">
             Browse Stores
           </Link>
           <button 
             onClick={() => setIsRegisterModalOpen(true)}
-            className="btn btn-outline"
+            className="btn btn-outline text-lg px-8 py-3"
           >
             Add Your Store
           </button>

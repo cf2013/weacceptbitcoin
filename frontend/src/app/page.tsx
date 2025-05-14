@@ -83,6 +83,21 @@ export default function Home() {
         isOpen={isRegisterModalOpen}
         onClose={() => setIsRegisterModalOpen(false)}
       />
+
+      {/* Hackathon Statement Section */}
+      <section className="py-16 bg-gray-50 mt-16">
+        <div className="max-w-3xl mx-auto text-center">
+          <p className="text-2xl font-light text-gray-700 mb-4">
+            This is a project about simplicity and inclusion.
+          </p>
+          <p className="text-xl text-gray-600 mb-4">
+            A project made for bitcoin conference 2025 Hackathon.
+          </p>
+          <p className="text-2xl font-medium text-bitcoin-orange">
+            A project to embrace hyperbitcoinzation.
+          </p>
+        </div>
+      </section>
     </div>
   );
 } 

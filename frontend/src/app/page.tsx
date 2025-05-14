@@ -96,6 +96,17 @@ export default function Home() {
           <p className="text-2xl font-medium text-bitcoin-orange">
             A project to embrace hyperbitcoinzation.
           </p>
+          <p className="mt-8 text-sm text-gray-500">
+            Created from scratch and with love by{' '}
+            <a 
+              href="https://x.com/ITE_kar" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-bitcoin-orange hover:text-bitcoin-orange/80 transition-colors"
+            >
+              CF
+            </a>
+          </p>
         </div>
       </section>
     </div>

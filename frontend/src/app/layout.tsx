@@ -5,8 +5,8 @@ import './globals.css';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'We Accept Bitcoin - Store Directory',
-  description: 'Find and verify Bitcoin-accepting stores with on-chain verified reviews',
+  title: 'btcapproved.com - Store Directory',
+  description: 'Onboard, Find and verify Bitcoin-accepting stores with on-chain verified reviews',
 };
 
 export default function RootLayout({

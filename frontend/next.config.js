@@ -13,13 +13,13 @@ const nextConfig = {
     ],
   },
   env: {
-    API_URL: process.env.API_URL || 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
+    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000',
   },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/:path*',
+        destination: `${process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000'}/api/:path*`,
       },
     ];
   },

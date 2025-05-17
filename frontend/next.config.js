@@ -8,20 +8,22 @@ const nextConfig = {
       'localhost',
       'supabase.co',
       'supabase.in',
-      'wxmksfojkiwlaiylqwht.supabase.co'  // Add your Supabase project domain
+      'wxmksfojkiwlaiylqwht.supabase.co',
+      'btcapproved-backend.azurewebsites.net'  // Add your Azure Container App domain
     ],
   },
   env: {
-    API_URL: process.env.API_URL || 'http://localhost:8000/api',
+    API_URL: process.env.API_URL || 'https://btcapproved-backend.azurewebsites.net/api',
   },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*', // Proxy to FastAPI backend
+        destination: 'https://btcapproved-backend.azurewebsites.net/api/:path*', // Proxy to Azure Container App
       },
     ];
   },
+  output: 'standalone', // Required for Azure Static Web Apps
 };
 
 module.exports = nextConfig;

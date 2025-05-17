@@ -104,7 +104,7 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
             <ol className="list-decimal list-inside space-y-2 text-blue-700">
               <li>Fill out your store details below</li>
               <li>Add your Bitcoin address for receiving payments</li>
-              <li>Send a small verification amount (1-10 USD in sats) to your own address</li>
+              <li>Send a small verification amount (1-10 USD in sats) <b>to your own address</b></li>
               <li>Submit the transaction ID to verify ownership</li>
             </ol>
             {btcPrice && (
@@ -276,7 +276,7 @@ const StoreForm: React.FC<StoreFormProps> = ({ initialData, onSubmit, isLoading 
           <p className="mt-1 text-sm text-red-500">{errors.btc_address.message}</p>
         )}
         <p className="mt-1 text-sm text-gray-500">
-          This address will be used for verification and receiving payments.
+          here goes your own store address!, will be used for verification and receiving payments.
         </p>
       </div>
 

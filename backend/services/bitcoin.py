@@ -34,11 +34,10 @@ def verify_transaction(txid: str, expected_address: str, min_amount: int) -> Dic
             }
         
         # Check outputs for the expected address and amount
-        # for testing purposes we can change if amount >= min_amount.
         for output in tx_data.get('vout', []):
             if output.get('scriptpubkey_address') == expected_address:
                 amount = output.get('value', 0)
-                if amount >= min_amount:
+                if amount == min_amount:
                     return {
                         'verified': True,
                         'amount': amount

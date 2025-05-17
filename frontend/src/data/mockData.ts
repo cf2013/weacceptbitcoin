@@ -8,6 +8,8 @@ export const mockStores: Store[] = [
     category: 'finance',
     btc_address: 'bc1qdrlj2w3ku5nuzvl0f4c7ug6jrl0l2dhdkllvyq',
     verified: true,
+    verification_txid: 'txid_microstrategy_verification_001',
+    verification_amount: 0.001,
     website: 'https://www.microstrategy.com',
     reviews: [
       {
@@ -32,6 +34,8 @@ export const mockStores: Store[] = [
     btc_address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     website: 'https://www.mercadolibre.com',
     verified: true,
+    verification_txid: 'txid_mercadolibre_verification_001',
+    verification_amount: 0.001,
     reviews: [
       {
         id: '2a433de2-12c4-44af-80d2-274f5e308b54',
@@ -84,6 +88,9 @@ export const mockStores: Store[] = [
     category: 'travel',
     btc_address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     verified: true,
+    verification_txid: 'txid_travala_verification_001',
+    verification_amount: 0.001,
+    website: 'https://www.travala.com',
     reviews: [
       {
         id: '43b65a3d-0263-428b-96b7-ccf19715d6de',
@@ -106,6 +113,9 @@ export const mockStores: Store[] = [
     category: 'travel',
     btc_address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     verified: true,
+    verification_txid: 'txid_cheapair_verification_001',
+    verification_amount: 0.001,
+    website: 'https://www.cheapair.com',
     reviews: [
       {
         id: '5538f4c5-e4cc-4603-964e-709756a2a285',
@@ -128,6 +138,9 @@ export const mockStores: Store[] = [
     category: 'retail',
     btc_address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     verified: true,
+    verification_txid: 'txid_newegg_verification_001',
+    verification_amount: 0.001,
+    website: 'https://www.newegg.com',
     reviews: [
       {
         id: 'b5f97da8-baa9-492f-bd5e-0e04567be6bd',
@@ -150,6 +163,9 @@ export const mockStores: Store[] = [
     category: 'food',
     btc_address: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
     verified: true,
+    verification_txid: 'txid_starbucks_verification_001',
+    verification_amount: 0.001,
+    website: 'https://www.starbucks.com',
     reviews: [
       {
         id: '9c85bf0a-3e02-4b97-b287-4242d107b9b4',

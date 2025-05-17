@@ -2,11 +2,11 @@
   "buildProperties": {
     "appBuildCommand": "npm run build",
     "apiBuildCommand": null,
-    "appArtifactLocation": ".next",
+    "appArtifactLocation": ".next/standalone",
     "apiArtifactLocation": null,
     "appLocation": ".",
     "apiLocation": null,
-    "outputLocation": ".next",
+    "outputLocation": ".next/standalone",
     "appDevserverUrl": "http://localhost:3000"
   },
   "routes": [

@@ -9,21 +9,21 @@ const nextConfig = {
       'supabase.co',
       'supabase.in',
       'wxmksfojkiwlaiylqwht.supabase.co',
-      'btcapproved-backend.azurewebsites.net'  // Add your Azure Container App domain
+      'btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io'
     ],
   },
   env: {
-    API_URL: process.env.API_URL || 'https://btcapproved-backend.azurewebsites.net/api',
+    API_URL: process.env.API_URL || 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api',
   },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://btcapproved-backend.azurewebsites.net/api/:path*', // Proxy to Azure Container App
+        destination: 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api/:path*',
       },
     ];
   },
-  output: 'standalone', // Required for Azure Static Web Apps
+  output: 'standalone',
 };
 
 module.exports = nextConfig;

@@ -13,17 +13,14 @@ const nextConfig = {
     ],
   },
   env: {
-    API_URL: process.env.API_URL || 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api',
+    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
   },
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api/:path*',
-      },
-    ];
+  output: 'export',
+  trailingSlash: true,
+  // Disable image optimization during export
+  images: {
+    unoptimized: true,
   },
-  output: 'standalone',
 };
 
 module.exports = nextConfig;

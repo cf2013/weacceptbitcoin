@@ -149,7 +149,7 @@ async def create_store_endpoint(
             "category": category,
             "website": website,
             "btc_address": btc_address,
-            "verified": False,  # Default to False
+            "verified": verification_txid is not None,  # Set verified based on verification_txid
             "verification_txid": verification_txid,
             "verification_amount": verification_amount
         }

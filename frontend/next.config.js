@@ -11,12 +11,10 @@ const nextConfig = {
       'wxmksfojkiwlaiylqwht.supabase.co',
       'btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io'
     ],
-    unoptimized: true,
   },
   env: {
-    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
+    API_URL: process.env.API_URL || 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api',
   },
-  output: 'standalone',
   async rewrites() {
     return [
       {
@@ -25,6 +23,7 @@ const nextConfig = {
       },
     ];
   },
+  output: 'standalone',
 };
 
 module.exports = nextConfig;

@@ -2,17 +2,27 @@
   "buildProperties": {
     "appBuildCommand": "npm run build",
     "apiBuildCommand": null,
-    "appArtifactLocation": ".next/standalone",
+    "appArtifactLocation": ".next",
     "apiArtifactLocation": null,
     "appLocation": ".",
     "apiLocation": null,
-    "outputLocation": ".next/standalone",
+    "outputLocation": ".next",
     "appDevserverUrl": "http://localhost:3000"
   },
   "routes": [
     {
-      "route": "/_next/*",
-      "serve": "/_next/*",
+      "route": "/_next/static/*",
+      "serve": "/_next/static/*",
+      "statusCode": 200
+    },
+    {
+      "route": "/_next/image*",
+      "serve": "/_next/image*",
+      "statusCode": 200
+    },
+    {
+      "route": "/_next/data/*",
+      "serve": "/_next/data/*",
       "statusCode": 200
     },
     {
@@ -28,7 +38,16 @@
   ],
   "navigationFallback": {
     "rewrite": "/index.html",
-    "exclude": ["/_next/*", "/api/*", "/images/*", "/css/*", "/js/*", "/*.{png,jpg,gif,svg,css,js}"]
+    "exclude": [
+      "/_next/static/*",
+      "/_next/image*",
+      "/_next/data/*",
+      "/api/*",
+      "/images/*",
+      "/css/*",
+      "/js/*",
+      "/*.{png,jpg,gif,svg,css,js}"
+    ]
   },
   "environmentVariables": {
     "NEXT_PUBLIC_BACKEND_URL": "https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io"

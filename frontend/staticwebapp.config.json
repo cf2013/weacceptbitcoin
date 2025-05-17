@@ -1,0 +1,26 @@
+{
+  "buildProperties": {
+    "appBuildCommand": "npm run build",
+    "apiBuildCommand": null,
+    "appArtifactLocation": ".next",
+    "apiArtifactLocation": null,
+    "appLocation": ".",
+    "apiLocation": null,
+    "outputLocation": ".next",
+    "appDevserverUrl": "http://localhost:3000"
+  },
+  "routes": [
+    {
+      "route": "/*",
+      "serve": "/index.html",
+      "statusCode": 200
+    }
+  ],
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/images/*", "/css/*", "/js/*", "/api/*", "/*.{png,jpg,gif,svg,css,js}"]
+  },
+  "environmentVariables": {
+    "NEXT_PUBLIC_BACKEND_URL": "https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io"
+  }
+} 

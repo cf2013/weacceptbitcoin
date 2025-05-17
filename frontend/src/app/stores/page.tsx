@@ -6,7 +6,7 @@ import Link from 'next/link';
 import StoreCard from '@/components/StoreCard';
 import { Store, Review } from '@/types';
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api` : 'http://localhost:8000/api';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api` : 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api';
 
 export default function StoresPage() {
   const [stores, setStores] = useState<Store[]>([]);

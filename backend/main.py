@@ -14,13 +14,16 @@ app = FastAPI(
 )
 
 # Configure CORS
-origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,https://icy-wave-07895090f.6.azurestaticapps.net,https://www.btcapproved.com").split(",")
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+print("CORS Origins from env:", cors_origins)  # Debug print
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    expose_headers=["*"]
 )
 
 # Health check endpoint

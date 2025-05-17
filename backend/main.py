@@ -14,7 +14,7 @@ app = FastAPI(
 )
 
 # Configure CORS
-origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,https://icy-wave-07895090f.6.azurestaticapps.net").split(",")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,

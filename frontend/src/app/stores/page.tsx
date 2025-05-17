@@ -6,7 +6,7 @@ import Link from 'next/link';
 import StoreCard from '@/components/StoreCard';
 import { Store, Review } from '@/types';
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api` : 'http://localhost:8000/api';
 
 export default function StoresPage() {
   const [stores, setStores] = useState<Store[]>([]);
@@ -24,7 +24,7 @@ export default function StoresPage() {
       setIsLoading(true);
 
       // Fetch stores
-      const storesResponse = await fetch(`${API_URL}/api/stores`);
+      const storesResponse = await fetch(`${API_URL}/stores`);
       if (!storesResponse.ok) {
         throw new Error(`Failed to fetch stores: ${storesResponse.statusText}`);
       }
@@ -34,7 +34,7 @@ export default function StoresPage() {
       const storesWithReviews = await Promise.all(
         storesData.map(async (store: Store) => {
           try {
-            const reviewsResponse = await fetch(`${API_URL}/api/reviews/store/${store.id}`);
+            const reviewsResponse = await fetch(`${API_URL}/reviews/store/${store.id}`);
             const reviewsData = reviewsResponse.ok ? await reviewsResponse.json() : [];
             return {
               ...store,

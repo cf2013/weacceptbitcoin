@@ -9,17 +9,22 @@ const nextConfig = {
       'supabase.co',
       'supabase.in',
       'wxmksfojkiwlaiylqwht.supabase.co',
-      'btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io'
+      'btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
+      'www.btcapproved.com'
     ],
   },
   env: {
-    NEXT_PUBLIC_BACKEND_URL: process.env.NEXT_PUBLIC_BACKEND_URL || 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
+    NEXT_PUBLIC_BACKEND_URL: process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:8000'
+      : 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
   },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api/:path*',
+        destination: process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:8000/api/:path*'
+          : 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api/:path*',
       },
     ];
   },

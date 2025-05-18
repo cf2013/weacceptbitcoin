@@ -14,7 +14,7 @@ app = FastAPI(
 )
 
 # Configure CORS
-cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000").split(",")
+cors_origins = os.getenv("CORS_ORIGINS", "http://localhost:3000,https://www.btcapproved.com").split(",")
 print("CORS Origins from env:", cors_origins)  # Debug print
 
 app.add_middleware(

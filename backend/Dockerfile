@@ -41,6 +41,8 @@ EXPOSE 8000
 # Set environment variables
 ENV PYTHONPATH=/app
 ENV PORT=8000
+ENV DOMAIN=btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io
+ENV CORS_ORIGINS=https://www.btcapproved.com
 
 # Run the application
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"] 

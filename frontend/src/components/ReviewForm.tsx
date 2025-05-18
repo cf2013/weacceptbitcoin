@@ -28,7 +28,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [verificationAmount, setVerificationAmount] = useState<number>(0);
   const [lnurlData, setLnurlData] = useState<{k1: string, lnurl: string, qr_code: string} | null>(null);
-  const [savePubkey, setSavePubkey] = useState<boolean>(false);
   const [userPubkey, setUserPubkey] = useState<string | null>(null);
   const [lnReviewStatus, setLnReviewStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
@@ -139,7 +138,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
         if (reviewDataRef.current) {
           const reviewPayload: ReviewFormData = {
             ...reviewDataRef.current,
-            user_pubkey: savePubkey ? data.pubkey : undefined,
+            user_pubkey: data.pubkey,
             txid: null,
           };
           console.log('Submitting review via LNAuth:', reviewPayload);
@@ -236,7 +235,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
       if (reviewDataRef.current) {
         const reviewPayload: ReviewFormData = {
           ...reviewDataRef.current,
-          user_pubkey: savePubkey ? data.pubkey : undefined,
+          user_pubkey: data.pubkey,
           txid: null,
         };
         
@@ -335,19 +334,6 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
             )}
           </div>
 
-          <div className="flex items-center mb-2">
-            <input
-              type="checkbox"
-              id="savePubkey"
-              className="mr-2"
-              checked={savePubkey}
-              onChange={(e) => setSavePubkey(e.target.checked)}
-            />
-            <label htmlFor="savePubkey" className="text-sm text-gray-700">
-              Save my pubkey with this review (optional)
-            </label>
-          </div>
-
           <div className="flex flex-col items-center space-y-2">
             <button
               type="button"
@@ -391,7 +377,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 Scan this QR code with your Lightning wallet to sign your review.
               </p>
               <p className="text-xs text-gray-500 mb-4">
-                This only proves you control your Lightning identity. {savePubkey ? 'Your pubkey will be saved with your review.' : 'Your pubkey will NOT be saved unless you check the box.'}
+                This will verify your Lightning identity and save your pubkey with your review.
               </p>
               <div className="flex justify-center mb-4">
                 <img 
@@ -420,11 +406,9 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
                 <FaCheckCircle className="mr-2" />
                 <p>Successfully signed with Lightning Network!</p>
               </div>
-              {savePubkey && (
-                <p className="mt-2 text-sm">
-                  Your pubkey has been saved with your review.
-                </p>
-              )}
+              <p className="mt-2 text-sm">
+                Your pubkey has been saved with your review.
+              </p>
             </div>
           )}
 
@@ -472,7 +456,7 @@ const ReviewForm: React.FC<ReviewFormProps> = ({
               </div>
 
               <form onSubmit={handleSubmit((data) => {
-                if (userPubkey && savePubkey) {
+                if (userPubkey) {
                   data.user_pubkey = userPubkey;
                 }
                 handleVerificationSubmit(data);

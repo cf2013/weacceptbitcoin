@@ -94,7 +94,7 @@ export default function Home() {
             A project made for bitcoin conference 2025 Hackathon.
           </p>
           <p className="text-2xl font-medium text-bitcoin-orange">
-            A project to embrace hyperbitcoinzation.
+            A project to embrace Hyperbitcoinization.
           </p>
           <p className="mt-8 text-sm text-gray-500">
             Created from scratch and with love by{' '}

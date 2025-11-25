@@ -236,7 +236,10 @@ async def verify_review(review_id: str):
 async def create_lnauth_challenge():
     """Create a new LNURL-auth challenge for signing a review."""
     try:
+        print("Starting LNURL-auth challenge generation")
+        print(f"Current domain: {lnurl_auth_service.domain}")
         k1, lnurl, qr_code = lnurl_auth_service.generate_challenge()
+        print(f"Successfully generated challenge with k1: {k1}")
         return {
             "k1": k1,
             "lnurl": lnurl,
@@ -245,8 +248,12 @@ async def create_lnauth_challenge():
     except Exception as e:
         print(f"Exception in create_lnauth_challenge: {str(e)}")
         import traceback
+        print("Full traceback:")
         print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to generate LNURL-auth challenge: {str(e)}"
+        )
 
 @router.post("/lnauth/verify", response_model=dict)
 async def verify_lnauth_signature(auth_request: LnurlAuthRequest):

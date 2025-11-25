@@ -6,7 +6,9 @@ const nextConfig = {
     domains: [
       'mempool.space',
       'localhost',
-      '*.blob.core.windows.net',  // Azure Blob Storage
+      'btcapprovedstorage.blob.core.windows.net',
+      'btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
+      'www.btcapproved.com'
     ],
     remotePatterns: [
       {
@@ -17,16 +19,21 @@ const nextConfig = {
     ],
   },
   env: {
-    API_URL: process.env.API_URL || 'http://localhost:8000/api',
+    NEXT_PUBLIC_BACKEND_URL: process.env.NODE_ENV === 'development' 
+      ? 'http://localhost:8000'
+      : 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
   },
   async rewrites() {
     return [
       {
         source: '/api/:path*',
-        destination: 'http://localhost:8000/api/:path*', // Proxy to FastAPI backend
+        destination: process.env.NODE_ENV === 'development' 
+          ? 'http://localhost:8000/api/:path*'
+          : 'https://btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io/api/:path*',
       },
     ];
   },
+  output: 'standalone',
 };
 
 module.exports = nextConfig;

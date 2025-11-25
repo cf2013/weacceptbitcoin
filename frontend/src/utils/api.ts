@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { Store, Review, StoreFormData, ReviewFormData, VerificationFormData, ApiResponse } from '@/types';
 
-const API_URL = process.env.API_URL || 'http://localhost:8000/api';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/api` : 'http://localhost:8000/api';
 
 const api = axios.create({
   baseURL: API_URL,

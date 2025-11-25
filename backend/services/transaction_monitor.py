@@ -55,8 +55,14 @@ class TransactionMonitor:
         Verify that a transaction was sent from the expected Bitcoin address.
         Returns a dictionary with verification status and details.
         """
+        print(f"\n=== Starting store transaction verification ===")
+        print(f"TXID: {txid}")
+        print(f"Expected address: {expected_address}")
+        print(f"Required verification amount: {verification_amount} sats")
+        
         tx_data = await self.get_transaction(txid)
         if not tx_data:
+            print("Transaction data not found")
             return {
                 'verified': False,
                 'error': 'Transaction not found or invalid'
@@ -64,28 +70,37 @@ class TransactionMonitor:
 
         # Check if transaction is confirmed
         if not tx_data.get('status', {}).get('confirmed'):
+            print("Transaction is not confirmed")
             return {
                 'verified': False,
                 'error': 'Transaction not confirmed yet'
             }
 
+        print("\nChecking transaction inputs and outputs:")
         # Check if any input address matches the expected address
-         # for testing purposes we can change if amount >= verification_amount.
         for vin in tx_data.get('vin', []):
-            if vin.get('prevout', {}).get('scriptpubkey_address') == expected_address:
+            input_address = vin.get('prevout', {}).get('scriptpubkey_address')
+            print(f"Checking input address: {input_address}")
+            if input_address == expected_address:
+                print("Found matching input address!")
                 amount = sum(vout.get('value', 0) for vout in tx_data.get('vout', []))
-                if amount >= verification_amount:
+                print(f"Total transaction amount: {amount} sats")
+                print(f"Required amount: {verification_amount} sats")
+                if amount == verification_amount:
+                    print("Amount matches exactly! Verification successful")
                     return {
                         'verified': True,
                         'amount': amount,
                         'txid': txid
                     }
                 else:
+                    print(f"Amount mismatch! Got {amount} sats, expected {verification_amount} sats")
                     return {
                         'verified': False,
                         'error': f'Transaction amount ({amount} sats) must be exactly {verification_amount} sats'
                     }
 
+        print("No matching input address found")
         return {
             'verified': False,
             'error': 'Transaction not sent from the expected address'
@@ -130,7 +145,7 @@ class TransactionMonitor:
                 
                 # If verification_amount is provided, check if the amount matches exactly
                 if verification_amount is not None:
-                    if amount >= verification_amount:
+                    if amount == verification_amount:
                         return {
                             'verified': True,
                             'amount': amount,

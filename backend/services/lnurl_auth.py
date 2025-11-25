@@ -50,6 +50,8 @@ class LnurlAuthService:
         
         # Create the LNURL
         lnurl_str = f"https://{self.domain}/api/auth/lnurl/callback?tag={self.tag}&k1={k1}&action={self.action}"
+        # Remove any double https:// if present
+        lnurl_str = lnurl_str.replace("https://https://", "https://")
         print(f"Generated LNURL: {lnurl_str}")
         lnurl_encoded = lnurl.encode(lnurl_str)
         print(f"Encoded LNURL: {lnurl_encoded}")

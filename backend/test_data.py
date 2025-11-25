@@ -1,4 +1,4 @@
-from supabase_client import create_store, create_review
+from cosmos_repository import create_store, create_review
 
 # Test stores data
 test_stores = [

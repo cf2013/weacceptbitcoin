@@ -1,7 +1,7 @@
 import pytest
 from fastapi.testclient import TestClient
 from main import app
-from supabase_client import create_store, get_store, update_store, get_stores, get_reviews
+from cosmos_repository import create_store, get_store, update_store, get_stores, get_reviews
 
 client = TestClient(app)
 

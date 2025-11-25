@@ -3,7 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel, constr, validator
 from services.transaction_monitor import TransactionMonitor
 from services.lnurl_auth import LnurlAuthService
-from supabase_client import get_reviews, create_review, get_store, update_review
+from cosmos_repository import get_reviews, create_review, get_store, update_review
 import os
 
 router = APIRouter()

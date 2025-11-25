@@ -6,9 +6,14 @@ const nextConfig = {
     domains: [
       'mempool.space',
       'localhost',
-      'supabase.co',
-      'supabase.in',
-      'wxmksfojkiwlaiylqwht.supabase.co'  // Add your Supabase project domain
+      '*.blob.core.windows.net',  // Azure Blob Storage
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.blob.core.windows.net',
+        pathname: '/**',
+      },
     ],
   },
   env: {

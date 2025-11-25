@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from azure.cosmos import exceptions
 from infrastructure.cosmos_client import get_cosmos_resources
 import uuid
+from datetime import datetime, timezone
 
 
 @dataclass
@@ -32,6 +33,10 @@ def create_store(store_data: Dict) -> Optional[Dict]:
     # Generate UUID if not provided
     if 'id' not in store_data:
         store_data['id'] = str(uuid.uuid4())
+    # Add timestamps
+    now = datetime.now(timezone.utc).isoformat()
+    store_data['created_at'] = now
+    store_data['updated_at'] = now
     created = stores_container.create_item(body=store_data)
     return created
 
@@ -43,7 +48,8 @@ def update_store(store_id: str, update_data: Dict) -> Optional[Dict]:
     except exceptions.CosmosResourceNotFoundError:
         return None
 
-    # Merge fields
+    # Merge fields and update timestamp
+    update_data['updated_at'] = datetime.now(timezone.utc).isoformat()
     updated = {**existing, **update_data}
     replaced = stores_container.replace_item(item=store_id, body=updated)
     return replaced

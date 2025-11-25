@@ -6,11 +6,16 @@ const nextConfig = {
     domains: [
       'mempool.space',
       'localhost',
-      'supabase.co',
-      'supabase.in',
-      'wxmksfojkiwlaiylqwht.supabase.co',
+      'btcapprovedstorage.blob.core.windows.net',
       'btcapproved-backend.livelycoast-10565395.eastus.azurecontainerapps.io',
       'www.btcapproved.com'
+    ],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.blob.core.windows.net',
+        pathname: '/**',
+      },
     ],
   },
   env: {

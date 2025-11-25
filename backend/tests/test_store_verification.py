@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from main import app
 from services.bitcoin import verify_transaction
-from supabase_client import get_store, update_store
+from cosmos_repository import get_store, update_store
 
 client = TestClient(app)
 

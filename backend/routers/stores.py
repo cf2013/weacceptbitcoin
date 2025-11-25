@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form
 from pydantic import BaseModel, constr, UUID4
 from typing import Optional, List
-from supabase_client import get_store, get_stores, create_store, update_store, get_reviews
+from cosmos_repository import get_store, get_stores, create_store, update_store, get_reviews
 from services.bitcoin import verify_transaction
 from services.transaction_monitor import TransactionMonitor
 from services.image_upload import upload_image, delete_image
